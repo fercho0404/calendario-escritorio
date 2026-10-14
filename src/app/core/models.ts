@@ -54,7 +54,17 @@ export interface BackConfig {
   background?: Photo | null;
 }
 
-export type DecorKind = 'acuarela' | 'hojas' | 'confeti' | 'estrellas' | 'arcos' | 'marco' | 'ninguna';
+export type DecorKind =
+  | 'acuarela'
+  | 'hojas'
+  | 'confeti'
+  | 'estrellas'
+  | 'corazones'
+  | 'copos'
+  | 'puntos'
+  | 'arcos'
+  | 'marco'
+  | 'ninguna';
 export type LabelStyle = 'mancha' | 'pastilla' | 'texto';
 export type PhotoShape = 'circulo' | 'aro' | 'redondeada';
 export type CoverFrame = 'polaroid' | 'arco' | 'simple';

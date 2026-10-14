@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
 import { DecorKind } from '../core/models';
 
 interface Shape {
-  kind: 'circle' | 'rect' | 'tri' | 'star';
+  kind: 'circle' | 'rect' | 'tri' | 'star' | 'heart' | 'flake' | 'dot';
   x: number;
   y: number;
   s: number;
@@ -106,6 +106,15 @@ const SPRIG_LEAVES: [number, number, number][] = [
                 @case ('star') {
                   <path [attr.d]="star(s)" [attr.fill]="s.c" />
                 }
+                @case ('heart') {
+                  <path [attr.d]="heart(s)" [attr.fill]="s.c" opacity="0.9" />
+                }
+                @case ('flake') {
+                  <path [attr.d]="flake(s)" fill="none" [attr.stroke]="s.c" stroke-width="0.3" stroke-linecap="round" />
+                }
+                @case ('dot') {
+                  <circle [attr.cx]="s.x" [attr.cy]="s.y" [attr.r]="s.s / 2" [attr.fill]="s.c" opacity="0.55" />
+                }
               }
             }
           }
@@ -162,17 +171,42 @@ export class Decor {
   protected readonly shapes = computed<Shape[]>(() => {
     const b = this.bind();
     const c = [...this.colors()];
-    const stars = this.kind() === 'estrellas';
-    const kinds: Shape['kind'][] = stars ? ['star'] : ['circle', 'rect', 'tri', 'circle'];
-    const size: [number, number] = stars ? [1.6, 3.6] : [1, 2.4];
-    if (this.area() === 'month') return scatter(7, stars ? 9 : 16, 116, 156, b + 2, b + 20, c, kinds, size);
+    // [formas, tamaño mín-máx en mm, cantidad en el mes, cantidad en franjas de portada, cantidad en laterales]
+    const cfg: Record<string, [Shape['kind'][], [number, number], number, number, number]> = {
+      estrellas: [['star'], [1.6, 3.6], 9, 10, 4],
+      corazones: [['heart'], [1.6, 3.4], 9, 11, 4],
+      copos: [['flake'], [2, 4.2], 9, 10, 4],
+      puntos: [['dot'], [1.4, 4.2], 14, 16, 6],
+      confeti: [['circle', 'rect', 'tri', 'circle'], [1, 2.4], 16, 18, 7],
+    };
+    const [kinds, size, nMonth, nBand, nSide] = cfg[this.kind()] ?? cfg['confeti'];
+    if (this.area() === 'month') return scatter(7, nMonth, 116, 156, b + 2, b + 20, c, kinds, size);
     return [
-      ...scatter(11, stars ? 10 : 18, 8, 202, b + 1.5, b + 6.5, c, kinds, size),
-      ...scatter(13, stars ? 10 : 18, 8, 202, 139, 146, c, kinds, size),
-      ...scatter(17, stars ? 4 : 7, 6, 34, b + 10, 136, c, kinds, size),
-      ...scatter(19, stars ? 4 : 7, 176, 204, b + 10, 136, c, kinds, size),
+      ...scatter(11, nBand, 8, 202, b + 1.5, b + 6.5, c, kinds, size),
+      ...scatter(13, nBand, 8, 202, 139, 146, c, kinds, size),
+      ...scatter(17, nSide, 6, 34, b + 10, 136, c, kinds, size),
+      ...scatter(19, nSide, 176, 204, b + 10, 136, c, kinds, size),
     ];
   });
+
+  protected heart(s: Shape) {
+    const r = s.s / 2;
+    const { x, y } = s;
+    const f = (n: number) => n.toFixed(2);
+    return `M${f(x)} ${f(y + r * 0.8)} C ${f(x - r * 1.3)} ${f(y - r * 0.1)} ${f(x - r * 0.6)} ${f(y - r * 1.05)} ${f(x)} ${f(y - r * 0.35)} C ${f(x + r * 0.6)} ${f(y - r * 1.05)} ${f(x + r * 1.3)} ${f(y - r * 0.1)} ${f(x)} ${f(y + r * 0.8)} Z`;
+  }
+
+  protected flake(s: Shape) {
+    const r = s.s / 2;
+    return [0, 60, 120]
+      .map((deg) => {
+        const a = ((deg + s.r) * Math.PI) / 180;
+        const dx = Math.cos(a) * r;
+        const dy = Math.sin(a) * r;
+        return `M${(s.x - dx).toFixed(2)} ${(s.y - dy).toFixed(2)} L${(s.x + dx).toFixed(2)} ${(s.y + dy).toFixed(2)}`;
+      })
+      .join(' ');
+  }
 
   protected tri(s: Shape) {
     const a = (s.r * Math.PI) / 180;
