@@ -5,11 +5,13 @@ import {
   ElementRef,
   afterNextRender,
   computed,
+  effect,
   inject,
   signal,
   viewChild,
 } from '@angular/core';
 import { CalendarStore } from './core/calendar.store';
+import { FontLoader } from './core/fonts';
 import { MONTH_NAMES, PAGE_COUNT } from './core/models';
 import { exportPagesToPdf } from './core/pdf-export';
 import { EditorPanel } from './editor/editor-panel';
@@ -52,7 +54,15 @@ export class App {
     return `${MONTH_NAMES[p - 1]} ${this.store.year()}`;
   });
 
+  private readonly fonts = inject(FontLoader);
+
   constructor() {
+    // Descarga las fuentes elegidas (las que no vienen incluidas en el build).
+    effect(() => {
+      this.fonts.ensure(this.store.fontMain());
+      this.fonts.ensure(this.store.fontScript());
+      this.fonts.ensure(this.store.fontCover());
+    });
     const destroyRef = inject(DestroyRef);
     afterNextRender(() => {
       const el = this.stage()?.nativeElement;
@@ -109,6 +119,7 @@ export class App {
       if (!root) throw new Error('Sin contenedor de exportación');
       const pages = Array.from(root.querySelectorAll<HTMLElement>('.calendar-page'));
       const fonts = { main: this.store.fontMain(), script: this.store.fontScript(), cover: this.store.fontCover() };
+      await Promise.all(Object.values(fonts).map((f) => this.fonts.ensure(f)));
       await exportPagesToPdf(pages, `calendario-${this.store.year()}.pdf`, scale, fonts, (done, total) =>
         this.progress.set({ done, total }),
       );

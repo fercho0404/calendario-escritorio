@@ -52,37 +52,6 @@ export interface BackConfig {
 
 export type WeekStart = 'lunes' | 'domingo';
 
-export interface FontOption {
-  name: string;
-  /** valor de font-family */
-  family: string;
-}
-
-/** Tipografía principal: títulos, números, días y textos. */
-export const MAIN_FONTS: FontOption[] = [
-  { name: 'Montserrat', family: 'Montserrat' },
-  { name: 'Poppins', family: 'Poppins' },
-  { name: 'Raleway', family: 'Raleway' },
-  { name: 'Lato', family: 'Lato' },
-  { name: 'Josefin Sans', family: 'Josefin Sans' },
-  { name: 'Quicksand', family: 'Quicksand' },
-  { name: 'Nunito', family: 'Nunito' },
-  { name: 'Playfair Display (serif)', family: 'Playfair Display' },
-  { name: 'Lora (serif)', family: 'Lora' },
-];
-
-/** Tipografía cursiva: nombres en las celdas, frase del mes y firma de la portada. */
-export const SCRIPT_FONTS: FontOption[] = [
-  { name: 'Dancing Script', family: 'Dancing Script' },
-  { name: 'Allura', family: 'Allura' },
-  { name: 'Great Vibes', family: 'Great Vibes' },
-  { name: 'Sacramento', family: 'Sacramento' },
-  { name: 'Parisienne', family: 'Parisienne' },
-  { name: 'Satisfy', family: 'Satisfy' },
-  { name: 'Pacifico', family: 'Pacifico' },
-  { name: 'Caveat', family: 'Caveat' },
-];
-
 export interface ProjectData {
   app: 'calendario-escritorio';
   version: 1;

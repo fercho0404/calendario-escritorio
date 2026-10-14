@@ -55,17 +55,9 @@
         <div class="add">
           <input class="name" placeholder="Nombre / etiqueta" [value]="draftName()" (input)="draftName.set(val($event))"
             (keydown.enter)="addDraft()" />
-          <select [value]="draftMonth()" (change)="draftMonth.set(num($event))">
-            @for (m of monthNames; track m; let i = $index) {
-              <option [value]="i + 1" [selected]="draftMonth() === i + 1">{{ m }}</option>
-            }
-          </select>
+          <app-search-select [options]="monthOptions" [value]="draftMonth() + ''" (valueChange)="draftMonth.set(toInt($event))" />
           <input type="number" min="1" [max]="maxDay(draftMonth())" [value]="draftDay()" (input)="draftDay.set(num($event))" />
-          <select (change)="draftType.set($any(val($event)))">
-            @for (t of types; track t) {
-              <option [value]="t" [selected]="draftType() === t">{{ typeLabel[t] }}</option>
-            }
-          </select>
+          <app-search-select [options]="typeOptions" [value]="draftType()" (valueChange)="draftType.set(asType($event))" />
           <button type="button" class="btn primary" (click)="addDraft()" [disabled]="!draftName().trim()">Agregar</button>
         </div>
       </section>
@@ -73,13 +65,7 @@
       <section class="card list-card">
         <div class="list-head">
           <h3>Fechas ({{ visibleEvents().length }})</h3>
-          <select (change)="setFilter($event)">
-            <option value="auto" [selected]="filter() === 'auto'">Mes de la página visible</option>
-            <option value="all" [selected]="filter() === 'all'">Todos los meses</option>
-            @for (m of monthNames; track m; let i = $index) {
-              <option [value]="i + 1" [selected]="filter() === i + 1">{{ m }}</option>
-            }
-          </select>
+          <app-search-select class="filter" [options]="filterOptions" [value]="filterValue()" (valueChange)="setFilter($event)" />
         </div>
         @if (!visibleEvents().length) {
           <p class="help">No hay fechas {{ filterMonth() ? 'en ' + monthNames[filterMonth()! - 1] : 'cargadas' }}.</p>
@@ -92,18 +78,10 @@
               <button type="button" class="icon-btn" title="Eliminar" (click)="store.removeEvent(e.id)">✕</button>
             </div>
             <div class="ev-fields">
-              <select (change)="store.updateEvent(e.id, { month: num($event) })">
-                @for (m of monthNames; track m; let i = $index) {
-                  <option [value]="i + 1" [selected]="e.month === i + 1">{{ m }}</option>
-                }
-              </select>
+              <app-search-select [options]="monthOptions" [value]="e.month + ''" (valueChange)="store.updateEvent(e.id, { month: toInt($event) })" />
               <input type="number" min="1" [max]="maxDay(e.month)" [value]="e.day"
                 (change)="store.updateEvent(e.id, { day: num($event) })" />
-              <select (change)="store.updateEvent(e.id, { type: $any(val($event)) })">
-                @for (t of types; track t) {
-                  <option [value]="t" [selected]="e.type === t">{{ typeLabel[t] }}</option>
-                }
-              </select>
+              <app-search-select [options]="typeOptions" [value]="e.type" (valueChange)="store.updateEvent(e.id, { type: asType($event) })" />
             </div>
             @if (e.type !== 'festivo' && store.showPhotos()) {
               <app-photo-editor [photo]="e.photo" [round]="true" (photoChange)="setEventPhoto(e.id, $event)" />
@@ -121,27 +99,15 @@
       <section class="card">
         <h3>Diseño general</h3>
         <p class="help">Aplica a las 14 páginas.</p>
-        <label class="field">Tipografía general
-          <select class="font-select" [style.font-family]="'&quot;' + store.fontMain() + '&quot;'" (change)="store.fontMain.set(val($event))">
-            @for (f of mainFonts; track f.family) {
-              <option [value]="f.family" [selected]="store.fontMain() === f.family" [style.font-family]="'&quot;' + f.family + '&quot;'">{{ f.name }}</option>
-            }
-          </select>
-        </label>
-        <label class="field">Tipografía cursiva (nombres y frases)
-          <select class="font-select script" [style.font-family]="'&quot;' + store.fontScript() + '&quot;'" (change)="store.fontScript.set(val($event))">
-            @for (f of scriptFonts; track f.family) {
-              <option [value]="f.family" [selected]="store.fontScript() === f.family" [style.font-family]="'&quot;' + f.family + '&quot;'">{{ f.name }}</option>
-            }
-          </select>
-        </label>
-        <label class="field">Tipografía de la firma de portada
-          <select class="font-select script" [style.font-family]="'&quot;' + store.fontCover() + '&quot;'" (change)="store.fontCover.set(val($event))">
-            @for (f of scriptFonts; track f.family) {
-              <option [value]="f.family" [selected]="store.fontCover() === f.family" [style.font-family]="'&quot;' + f.family + '&quot;'">{{ f.name }}</option>
-            }
-          </select>
-        </label>
+        <div class="field">Tipografía general
+          <app-search-select [options]="mainFontOptions" [value]="store.fontMain()" [bigPreview]="true" searchPlaceholder="Buscar fuente…" (visibleChange)="previewFonts($event)" (valueChange)="store.fontMain.set($event)" />
+        </div>
+        <div class="field">Tipografía cursiva (nombres y frases)
+          <app-search-select [options]="scriptFontOptions" [value]="store.fontScript()" [bigPreview]="true" searchPlaceholder="Buscar fuente…" (visibleChange)="previewFonts($event)" (valueChange)="store.fontScript.set($event)" />
+        </div>
+        <div class="field">Tipografía de la firma de portada
+          <app-search-select [options]="scriptFontOptions" [value]="store.fontCover()" [bigPreview]="true" searchPlaceholder="Buscar fuente…" (visibleChange)="previewFonts($event)" (valueChange)="store.fontCover.set($event)" />
+        </div>
         <label class="switch">
           <input type="checkbox" [checked]="store.showPhotos()" (change)="store.showPhotos.set(!store.showPhotos())" />
           <span class="track"><i></i></span>
@@ -227,13 +193,9 @@
       <section class="card">
         <h3>Exportar a PDF</h3>
         <p class="help">Genera 14 páginas de 21 × 15 cm: portada, 12 meses y contraportada.</p>
-        <label class="field inline">Calidad
-          <select (change)="pdfScale.set(num($event))">
-            <option value="2" [selected]="pdfScale() === 2">Borrador (~190 ppp)</option>
-            <option value="3" [selected]="pdfScale() === 3">Impresión (~290 ppp)</option>
-            <option value="4" [selected]="pdfScale() === 4">Alta (~380 ppp)</option>
-          </select>
-        </label>
+        <div class="field inline">Calidad
+          <app-search-select [options]="qualityOptions" [value]="pdfScale() + ''" (valueChange)="pdfScale.set(toInt($event))" />
+        </div>
         <button type="button" class="btn primary" (click)="exportPdf.emit(pdfScale())">Exportar PDF</button>
       </section>
 

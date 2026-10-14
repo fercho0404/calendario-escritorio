@@ -7,7 +7,8 @@ App web en Angular 22 para diseñar un calendario de escritorio familiar de **21
 - **Carga de fechas** desde CSV o JSON (nombre, mes, día y tipo: cumpleaños, festivo o fallecimiento).
 - **Selección de año**: la cuadrícula se recalcula para que cada fecha caiga en su día real de la semana.
 - **Inicio de semana** configurable: lunes o domingo.
-- **Tipografías** seleccionables: general (títulos, números y textos), cursiva (nombres y frases) y firma de la portada.
+- **Tipografías** seleccionables con buscador (más de 140 fuentes): general (títulos, números y textos), cursiva (nombres y frases) y firma de la portada. Montserrat, Dancing Script y Allura vienen incluidas; las demás se descargan de Google Fonts al elegirlas (requiere conexión).
+- Todos los combos tienen **buscador**: escribe para filtrar, flechas para moverte y Enter para elegir.
 - **Festivos de Colombia** calculados automáticamente para el año elegido (Semana Santa y Ley Emiliani incluidas).
 - **Íconos por tipo**: globos (cumpleaños), banderines (festivo) y vela (fallecimiento).
 - **Fotos** por cumpleaños y fallecimiento, en círculos en zigzag al lado del mes, con zoom y encuadre. Se pueden desactivar: sin fotos, la cuadrícula ocupa todo el ancho de la página.

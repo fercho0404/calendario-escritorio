@@ -3,15 +3,9 @@ import { CalendarStore } from '../core/calendar.store';
 import { downloadText } from '../core/image-utils';
 import { CSV_TEMPLATE, JSON_TEMPLATE, parseCsv, parseJson } from '../core/importer';
 import { daysInMonth } from '../core/calendar-utils';
-import {
-  EVENT_TYPE_LABEL,
-  EventType,
-  MAIN_FONTS,
-  MONTH_NAMES,
-  Photo,
-  ProjectData,
-  SCRIPT_FONTS,
-} from '../core/models';
+import { EVENT_TYPE_LABEL, EventType, MONTH_NAMES, Photo, ProjectData } from '../core/models';
+import { FontDef, FontLoader, MAIN_FONTS, SCRIPT_FONTS } from '../core/fonts';
+import { SearchSelect, SelectOption } from '../shared/search-select';
 import { EventIcon } from '../shared/event-icon';
 import { PhotoEditor } from './photo-editor';
 
@@ -20,7 +14,7 @@ type Tab = 'fechas' | 'pagina' | 'proyecto';
 @Component({
   selector: 'app-editor-panel',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PhotoEditor, EventIcon],
+  imports: [PhotoEditor, EventIcon, SearchSelect],
   templateUrl: './editor-panel.html',
   styleUrl: './editor-panel.scss',
 })
@@ -31,8 +25,39 @@ export class EditorPanel {
   protected readonly tab = signal<Tab>('fechas');
   protected readonly monthNames = MONTH_NAMES;
   protected readonly typeLabel = EVENT_TYPE_LABEL;
-  protected readonly mainFonts = MAIN_FONTS;
-  protected readonly scriptFonts = SCRIPT_FONTS;
+  private readonly fonts = inject(FontLoader);
+  private static fontOptions(list: FontDef[]): SelectOption[] {
+    return list.map((f) => ({ value: f.family, label: f.family, group: f.group, font: f.family }));
+  }
+  protected readonly mainFontOptions = EditorPanel.fontOptions(MAIN_FONTS);
+  protected readonly scriptFontOptions = EditorPanel.fontOptions(SCRIPT_FONTS);
+  protected readonly monthOptions: SelectOption[] = MONTH_NAMES.map((m, i) => ({ value: String(i + 1), label: m }));
+  protected readonly typeOptions: SelectOption[] = (['cumpleanos', 'festivo', 'fallecimiento'] as EventType[]).map(
+    (t) => ({ value: t, label: EVENT_TYPE_LABEL[t] }),
+  );
+  protected readonly filterOptions: SelectOption[] = [
+    { value: 'auto', label: 'Mes de la página visible' },
+    { value: 'all', label: 'Todos los meses' },
+    ...MONTH_NAMES.map((m, i) => ({ value: String(i + 1), label: m, group: 'Meses' })),
+  ];
+  protected readonly qualityOptions: SelectOption[] = [
+    { value: '2', label: 'Borrador (~190 ppp)' },
+    { value: '3', label: 'Impresión (~290 ppp)' },
+    { value: '4', label: 'Alta (~380 ppp)' },
+  ];
+  protected readonly filterValue = computed(() => String(this.filter()));
+
+  protected previewFonts(opts: SelectOption[]) {
+    opts.forEach((o) => o.font && this.fonts.preview(o.font));
+  }
+
+  protected toInt(v: string) {
+    return parseInt(v, 10);
+  }
+
+  protected asType(v: string) {
+    return v as EventType;
+  }
   protected readonly types: EventType[] = ['cumpleanos', 'festivo', 'fallecimiento'];
 
   // ---- importación ----
@@ -76,8 +101,7 @@ export class EditorPanel {
     return parseInt((ev.target as HTMLInputElement).value, 10);
   }
 
-  protected setFilter(ev: Event) {
-    const v = this.val(ev);
+  protected setFilter(v: string) {
     this.filter.set(v === 'auto' || v === 'all' ? v : parseInt(v, 10));
   }
 

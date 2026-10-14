@@ -69,11 +69,11 @@ code { background: #f4efec; padding: 0 4px; border-radius: 3px; font-size: 11px;
   grid-template-columns: 1fr 1fr 60px;
   gap: 6px;
   .name { grid-column: 1 / -1; }
-  select:last-of-type { grid-column: 1 / 3; }
+  app-search-select:last-of-type { grid-column: 1 / 3; }
 }
 
 .list-card { gap: 10px; }
-.list-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; select { max-width: 60%; } }
+.list-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; .filter { width: 60%; } }
 
 .ev {
   border: 1px solid var(--ui-line);
