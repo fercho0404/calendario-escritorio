@@ -26,6 +26,8 @@ export class CalendarStore {
   readonly year = signal(defaultYear());
   readonly bindingMm = signal(15);
   readonly weekStart = signal<WeekStart>('lunes');
+  /** Fotos de las personas al lado de cada mes. Sin fotos, la cuadrícula ocupa todo el ancho. */
+  readonly showPhotos = signal(true);
   readonly fontMain = signal('Montserrat');
   readonly fontScript = signal('Dancing Script');
   readonly fontCover = signal('Allura');
@@ -75,6 +77,7 @@ export class CalendarStore {
       year: this.year(),
       bindingMm: this.bindingMm(),
       weekStart: this.weekStart(),
+      showPhotos: this.showPhotos(),
       fontMain: this.fontMain(),
       fontScript: this.fontScript(),
       fontCover: this.fontCover(),
@@ -89,6 +92,7 @@ export class CalendarStore {
     if (p.year) this.year.set(p.year);
     if (p.bindingMm) this.bindingMm.set(p.bindingMm);
     if (p.weekStart) this.weekStart.set(p.weekStart);
+    if (typeof p.showPhotos === 'boolean') this.showPhotos.set(p.showPhotos);
     if (p.fontMain) this.fontMain.set(p.fontMain);
     if (p.fontScript) this.fontScript.set(p.fontScript);
     if (p.fontCover) this.fontCover.set(p.fontCover);
@@ -105,6 +109,7 @@ export class CalendarStore {
     this.year.set(defaultYear());
     this.bindingMm.set(15);
     this.weekStart.set('lunes');
+    this.showPhotos.set(true);
     this.fontMain.set('Montserrat');
     this.fontScript.set('Dancing Script');
     this.fontCover.set('Allura');

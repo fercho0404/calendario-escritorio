@@ -105,7 +105,7 @@
                 }
               </select>
             </div>
-            @if (e.type !== 'festivo') {
+            @if (e.type !== 'festivo' && store.showPhotos()) {
               <app-photo-editor [photo]="e.photo" [round]="true" (photoChange)="setEventPhoto(e.id, $event)" />
             }
             @if (isInvalid(e.id)) {
@@ -141,6 +141,14 @@
               <option [value]="f.family" [selected]="store.fontCover() === f.family" [style.font-family]="'&quot;' + f.family + '&quot;'">{{ f.name }}</option>
             }
           </select>
+        </label>
+        <label class="switch">
+          <input type="checkbox" [checked]="store.showPhotos()" (change)="store.showPhotos.set(!store.showPhotos())" />
+          <span class="track"><i></i></span>
+          <span class="switch-text">
+            <strong>Fotos en los meses</strong>
+            <small>{{ store.showPhotos() ? 'Se muestran al lado de cada mes.' : 'Sin fotos: la cuadrícula ocupa todo el ancho.' }}</small>
+          </span>
         </label>
         <div class="field">La semana inicia el
           <div class="seg">
@@ -194,7 +202,9 @@
               <label>Etiquetas <input type="color" [value]="m.accent" (input)="store.updateMonth(i, { accent: val($event) })" /></label>
               <label>Festivos <input type="color" [value]="m.holiday" (input)="store.updateMonth(i, { holiday: val($event) })" /></label>
             </div>
+            @if (store.showPhotos()) {
             <p class="help">Las fotos de este mes se cargan en la pestaña <button type="button" class="link" (click)="tab.set('fechas')">Fechas</button>, en cada cumpleaños o fallecimiento.</p>
+            }
           </section>
         }
       }

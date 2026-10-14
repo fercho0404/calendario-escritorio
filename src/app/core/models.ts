@@ -89,6 +89,7 @@ export interface ProjectData {
   year: number;
   bindingMm: number;
   weekStart?: WeekStart;
+  showPhotos?: boolean;
   fontMain?: string;
   fontScript?: string;
   fontCover?: string;

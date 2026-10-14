@@ -175,3 +175,21 @@ input[type='color'] { height: 30px; border: 1px solid var(--ui-line); border-rad
     &.on { background: #fff; color: var(--ui-ink); box-shadow: 0 1px 2px rgba(0, 0, 0, .08); }
   }
 }
+
+.switch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 4px 0;
+  input { position: absolute; opacity: 0; pointer-events: none; }
+  .track {
+    flex: none; width: 36px; height: 20px; border-radius: 10px; background: #d9cfca; position: relative;
+    transition: background .15s;
+    i { position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, .2); transition: transform .15s; }
+  }
+  input:checked + .track { background: var(--ui-accent); i { transform: translateX(16px); } }
+  input:focus-visible + .track { outline: 2px solid var(--ui-focus); outline-offset: 2px; }
+  .switch-text { display: grid; gap: 1px; strong { font-size: 12px; } small { font-size: 11px; color: var(--ui-muted); } }
+}

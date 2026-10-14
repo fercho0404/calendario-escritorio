@@ -10,7 +10,7 @@ App web en Angular 22 para diseñar un calendario de escritorio familiar de **21
 - **Tipografías** seleccionables: general (títulos, números y textos), cursiva (nombres y frases) y firma de la portada.
 - **Festivos de Colombia** calculados automáticamente para el año elegido (Semana Santa y Ley Emiliani incluidas).
 - **Íconos por tipo**: globos (cumpleaños), banderines (festivo) y vela (fallecimiento).
-- **Fotos** por cumpleaños y fallecimiento, en círculos en zigzag al lado del mes, con zoom y encuadre.
+- **Fotos** por cumpleaños y fallecimiento, en círculos en zigzag al lado del mes, con zoom y encuadre. Se pueden desactivar: sin fotos, la cuadrícula ocupa todo el ancho de la página.
 - **Portada** con foto, título `CALENDARIO {año}` y firma; **contraportada** con foto, año y texto.
 - Frase y **caption** al pie de cada mes, y colores editables por mes.
 - **Margen de argollado** configurable (por defecto 15 mm) con guía visual que no se exporta.

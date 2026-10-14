@@ -184,3 +184,9 @@ h1 {
   white-space: nowrap;
   overflow: hidden;
 }
+
+/* Sin fotos: la cuadrícula se expande sobre el espacio de la columna de fotos */
+.cal-page.no-photos {
+  .main { width: calc(210mm - #{$pad-left} * 2); }
+  .photos { display: none; }
+}

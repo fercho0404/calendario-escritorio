@@ -15,6 +15,8 @@ const GRID_GAP = 0.7;
 const HEADER_AND_FOOTER = 39;
 const MAIN_W = 210 - PAD_LEFT - PAD_RIGHT - PHOTO_COL - COL_GAP;
 const CELL_W = (MAIN_W - 6 * GRID_GAP) / 7;
+/** Sin columna de fotos la cuadrícula usa todo el ancho, con márgenes simétricos. */
+const CELL_W_FULL = (210 - 2 * PAD_LEFT - 6 * GRID_GAP) / 7;
 
 interface CellView extends DayCell {
   fontMm: number;
@@ -65,6 +67,7 @@ export class MonthPage {
     const rows = grid.length / 7;
     const gridH = 150 - this.store.bindingMm() - HEADER_AND_FOOTER;
     const cellH = (gridH - (rows - 1) * GRID_GAP) / rows;
+    const cellW = this.store.showPhotos() ? CELL_W : CELL_W_FULL;
     return grid.map((c) => {
       const festLines = c.festivos.map((e) => wrapName(e.name, 11));
       const birthLines = c.births.map((e) => wrapName(e.name));
@@ -74,7 +77,7 @@ export class MonthPage {
       let fontMm = 3.9;
       if (all.length) {
         const longest = Math.max(...all.map((l) => l.length));
-        const byWidth = (CELL_W * 0.86) / (longest * 0.44);
+        const byWidth = (cellW * 0.86) / (longest * 0.44);
         const reserved = c.births.length || c.deaths.length ? 6.4 : 6;
         const byHeight = (cellH - reserved - blobs * 1.4) / (all.length * 1.04);
         fontMm = Math.max(1.8, Math.min(3.9, byWidth, byHeight));
@@ -86,6 +89,7 @@ export class MonthPage {
 
   /** Fotos en zigzag sobre la columna derecha, como en el calendario de referencia. */
   protected readonly photos = computed<PhotoSpot[]>(() => {
+    if (!this.store.showPhotos()) return [];
     const last = daysInMonth(this.store.year(), this.month());
     const evs = this.store
       .sortedEvents()

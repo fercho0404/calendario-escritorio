@@ -1,5 +1,6 @@
 <div
   class="cal-page"
+  [class.no-photos]="!store.showPhotos()"
   [style.--base]="cfg().base"
   [style.--accent]="cfg().accent"
   [style.--holiday]="cfg().holiday"
