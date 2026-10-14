@@ -3,7 +3,7 @@ import { Photo } from './models';
 const MAX_SIDE = 1600;
 
 /** Lee una imagen, la reduce a un tamaño razonable para impresión y la devuelve como Photo. */
-export async function fileToPhoto(file: File): Promise<Photo> {
+export async function fileToPhoto(file: File, maxSide = MAX_SIDE): Promise<Photo> {
   const url = URL.createObjectURL(file);
   try {
     const img = await new Promise<HTMLImageElement>((resolve, reject) => {
@@ -12,7 +12,7 @@ export async function fileToPhoto(file: File): Promise<Photo> {
       el.onerror = () => reject(new Error('No se pudo leer la imagen'));
       el.src = url;
     });
-    const ratio = Math.min(1, MAX_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
+    const ratio = Math.min(1, maxSide / Math.max(img.naturalWidth, img.naturalHeight));
     const w = Math.round(img.naturalWidth * ratio);
     const h = Math.round(img.naturalHeight * ratio);
     const canvas = document.createElement('canvas');

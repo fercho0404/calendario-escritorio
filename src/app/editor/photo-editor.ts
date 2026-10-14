@@ -46,6 +46,8 @@ import { Photo } from '../core/models';
 export class PhotoEditor {
   readonly photo = input<Photo | null | undefined>(null);
   readonly round = input(false);
+  /** Lado máximo en px al reducir la imagen (los fondos de página necesitan más resolución). */
+  readonly maxSide = input(1600);
   readonly photoChange = output<Photo | null>();
   protected readonly open = signal(false);
   protected readonly loading = signal(false);
@@ -62,7 +64,7 @@ export class PhotoEditor {
     if (!file) return;
     this.loading.set(true);
     try {
-      this.photoChange.emit(await fileToPhoto(file));
+      this.photoChange.emit(await fileToPhoto(file, this.maxSide()));
     } catch {
       alert('No se pudo leer la imagen.');
     } finally {

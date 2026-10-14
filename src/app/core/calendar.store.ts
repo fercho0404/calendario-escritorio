@@ -6,6 +6,7 @@ import {
   CoverConfig,
   MonthConfig,
   ProjectData,
+  StyleTokens,
   WeekStart,
   defaultBack,
   defaultCover,
@@ -13,8 +14,10 @@ import {
   newId,
 } from './models';
 import { idbGet, idbSet } from './storage';
+import { BUILT_IN_THEMES, THEME_FILE_APP, ThemeDef, defaultStyle } from './themes';
 
 const STORAGE_KEY = 'project';
+const THEMES_KEY = 'themes';
 
 function defaultYear(): number {
   const now = new Date();
@@ -35,6 +38,11 @@ export class CalendarStore {
   readonly months = signal<MonthConfig[]>(defaultMonths());
   readonly cover = signal<CoverConfig>(defaultCover());
   readonly back = signal<BackConfig>(defaultBack());
+  readonly style = signal<StyleTokens>(defaultStyle());
+
+  /** Plantillas propias cargadas por el usuario (se guardan aparte del proyecto). */
+  readonly customThemes = signal<ThemeDef[]>([]);
+  readonly themes = computed(() => [...BUILT_IN_THEMES, ...this.customThemes()]);
 
   /** Estado de interfaz (no se guarda en el proyecto) */
   readonly page = signal(0);
@@ -62,11 +70,17 @@ export class CalendarStore {
       clearTimeout(timer);
       timer = setTimeout(() => idbSet(STORAGE_KEY, data), 500);
     });
+    effect(() => {
+      const t = this.customThemes();
+      if (this.loaded()) idbSet(THEMES_KEY, t);
+    });
   }
 
   private async load() {
     const saved = await idbGet<ProjectData>(STORAGE_KEY);
     if (saved) this.applyProject(saved);
+    const themes = await idbGet<ThemeDef[]>(THEMES_KEY);
+    if (Array.isArray(themes)) this.customThemes.set(themes);
     this.loaded.set(true);
   }
 
@@ -81,6 +95,7 @@ export class CalendarStore {
       fontMain: this.fontMain(),
       fontScript: this.fontScript(),
       fontCover: this.fontCover(),
+      style: this.style(),
       events: this.events(),
       months: this.months(),
       cover: this.cover(),
@@ -96,6 +111,7 @@ export class CalendarStore {
     if (p.fontMain) this.fontMain.set(p.fontMain);
     if (p.fontScript) this.fontScript.set(p.fontScript);
     if (p.fontCover) this.fontCover.set(p.fontCover);
+    this.style.set({ ...defaultStyle(), ...(p.style ?? {}) });
     if (Array.isArray(p.events)) this.events.set(p.events);
     if (Array.isArray(p.months) && p.months.length === 12) {
       const defs = defaultMonths();
@@ -117,6 +133,7 @@ export class CalendarStore {
     this.months.set(defaultMonths());
     this.cover.set(defaultCover());
     this.back.set(defaultBack());
+    this.style.set(defaultStyle());
     this.page.set(0);
   }
 
@@ -175,5 +192,79 @@ export class CalendarStore {
 
   updateBack(patch: Partial<BackConfig>) {
     this.back.update((c) => ({ ...c, ...patch }));
+  }
+
+  // ---- estilo y plantillas ----
+  updateStyle(patch: Partial<StyleTokens>) {
+    this.style.update((s) => ({ ...s, ...patch }));
+  }
+
+  /** Aplica colores, tipografías y formas. Conserva fechas, textos, fotos y ajustes de posición. */
+  applyTheme(t: ThemeDef) {
+    this.style.update((s) => ({
+      ...s,
+      ...t.style,
+      themeId: t.id,
+      background: t.backgrounds?.general !== undefined ? t.backgrounds.general : s.background,
+    }));
+    this.fontMain.set(t.fonts.main);
+    this.fontScript.set(t.fonts.script);
+    this.fontCover.set(t.fonts.cover);
+    this.months.update((cur) =>
+      cur.map((m, i) => {
+        const [base, accent, holiday] = t.colors[i] ?? t.colors[0];
+        const bg = t.backgrounds?.months?.[i];
+        return { ...m, base, accent, holiday, ...(bg !== undefined ? { background: bg } : {}) };
+      }),
+    );
+    this.cover.update((c) => ({
+      ...c,
+      tagColor: t.tagColor,
+      ...(t.backgrounds?.cover !== undefined ? { background: t.backgrounds.cover } : {}),
+    }));
+    if (t.backgrounds?.back !== undefined) this.back.update((b) => ({ ...b, background: t.backgrounds!.back }));
+  }
+
+  /** Convierte el diseño actual en una plantilla para descargar y reutilizar. */
+  currentAsTheme(name: string, withBackgrounds: boolean): ThemeDef {
+    const { themeId, background, contentX, contentY, ...style } = this.style();
+    void themeId;
+    void contentX;
+    void contentY;
+    const months = this.months();
+    return {
+      id: 'custom-' + newId(),
+      name,
+      description: 'Plantilla propia',
+      custom: true,
+      style,
+      fonts: { main: this.fontMain(), script: this.fontScript(), cover: this.fontCover() },
+      colors: months.map((m) => [m.base, m.accent, m.holiday]),
+      tagColor: this.cover().tagColor,
+      backgrounds: withBackgrounds
+        ? {
+            general: background,
+            months: months.map((m) => m.background ?? null),
+            cover: this.cover().background ?? null,
+            back: this.back().background ?? null,
+          }
+        : undefined,
+    };
+  }
+
+  /** Valida un archivo de plantilla y lo agrega a "Mis plantillas". */
+  addCustomTheme(raw: unknown): ThemeDef {
+    const d = raw as { app?: string; theme?: ThemeDef };
+    const t = d?.app === THEME_FILE_APP ? d.theme : (raw as ThemeDef);
+    if (!t || !t.style || !t.fonts || !Array.isArray(t.colors) || !t.colors.length) {
+      throw new Error('Plantilla inválida');
+    }
+    const theme: ThemeDef = { ...t, id: 'custom-' + newId(), custom: true, name: t.name || 'Plantilla propia' };
+    this.customThemes.update((list) => [...list, theme]);
+    return theme;
+  }
+
+  removeCustomTheme(id: string) {
+    this.customThemes.update((list) => list.filter((t) => t.id !== id));
   }
 }

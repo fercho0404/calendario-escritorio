@@ -37,17 +37,56 @@ export interface MonthConfig {
   accent: string;
   /** color de la celda de festivo */
   holiday: string;
+  /** fondo propio de este mes (reemplaza el fondo general) */
+  background?: Photo | null;
 }
 
 export interface CoverConfig {
   photo: Photo | null;
   label: string;
   tagColor: string;
+  background?: Photo | null;
 }
 
 export interface BackConfig {
   photo: Photo | null;
   label: string;
+  background?: Photo | null;
+}
+
+export type DecorKind = 'acuarela' | 'hojas' | 'confeti' | 'estrellas' | 'arcos' | 'marco' | 'ninguna';
+export type LabelStyle = 'mancha' | 'pastilla' | 'texto';
+export type PhotoShape = 'circulo' | 'aro' | 'redondeada';
+export type CoverFrame = 'polaroid' | 'arco' | 'simple';
+
+/** Tokens visuales del calendario (los define una plantilla y se pueden ajustar). */
+export interface StyleTokens {
+  themeId: string;
+  /** color de títulos, números y textos */
+  ink: string;
+  /** color de la frase y textos secundarios */
+  inkSoft: string;
+  pageBg: string;
+  backBg: string;
+  decor: DecorKind;
+  /** tres colores para decoraciones, manchas de portada y círculos de contraportada */
+  decorColors: [string, string, string];
+  titleWeight: number;
+  /** espaciado del título en em */
+  titleSpacing: number;
+  titleUpper: boolean;
+  cellRadius: number;
+  /** 0 - 1 */
+  cellAlpha: number;
+  cellBorder: boolean;
+  labelStyle: LabelStyle;
+  photoShape: PhotoShape;
+  coverFrame: CoverFrame;
+  /** fondo general de los meses (por ejemplo, diseñado en Canva) */
+  background: Photo | null;
+  /** desplazamiento del contenido de los meses, en mm */
+  contentX: number;
+  contentY: number;
 }
 
 export type WeekStart = 'lunes' | 'domingo';
@@ -62,6 +101,7 @@ export interface ProjectData {
   fontMain?: string;
   fontScript?: string;
   fontCover?: string;
+  style?: StyleTokens;
   events: CalEvent[];
   months: MonthConfig[];
   cover: CoverConfig;

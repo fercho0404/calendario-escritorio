@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { CalendarStore } from '../core/calendar.store';
 import { BackPage } from './back-page';
 import { CoverPage } from './cover-page';
@@ -11,9 +11,7 @@ import { MonthPage } from './month-page';
   imports: [CoverPage, MonthPage, BackPage],
   host: {
     class: 'calendar-page',
-    '[style.--font-main]': 'quote(store.fontMain())',
-    '[style.--font-script]': 'quote(store.fontScript())',
-    '[style.--font-cover]': 'quote(store.fontCover())',
+    '[style]': 'vars()',
   },
   styles: `:host { display: block; width: 210mm; height: 150mm; }`,
   template: `
@@ -29,7 +27,27 @@ import { MonthPage } from './month-page';
 export class CalendarPage {
   readonly index = input.required<number>();
   protected readonly store = inject(CalendarStore);
-  protected quote(family: string) {
-    return `"${family}"`;
-  }
+
+  /** Variables CSS con los tokens de estilo; todas las páginas las usan. */
+  protected readonly vars = computed(() => {
+    const s = this.store.style();
+    const q = (f: string) => `"${f}"`;
+    return {
+      '--font-main': q(this.store.fontMain()),
+      '--font-script': q(this.store.fontScript()),
+      '--font-cover': q(this.store.fontCover()),
+      '--ink': s.ink,
+      '--ink-soft': s.inkSoft,
+      '--page-bg': s.pageBg,
+      '--back-bg': s.backBg,
+      '--deco-1': s.decorColors[0],
+      '--deco-2': s.decorColors[1],
+      '--deco-3': s.decorColors[2],
+      '--title-weight': String(s.titleWeight),
+      '--title-spacing': `${s.titleSpacing}em`,
+      '--title-transform': s.titleUpper ? 'uppercase' : 'none',
+      '--cell-radius': `${s.cellRadius}mm`,
+      '--cell-alpha': String(s.cellAlpha),
+    };
+  });
 }

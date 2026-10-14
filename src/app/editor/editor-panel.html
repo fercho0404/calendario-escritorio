@@ -1,5 +1,6 @@
 <nav class="tabs">
   <button type="button" [class.on]="tab() === 'fechas'" (click)="tab.set('fechas')">Fechas</button>
+  <button type="button" [class.on]="tab() === 'estilo'" (click)="tab.set('estilo')">Estilo</button>
   <button type="button" [class.on]="tab() === 'pagina'" (click)="tab.set('pagina')">Página</button>
   <button type="button" [class.on]="tab() === 'proyecto'" (click)="tab.set('proyecto')">Proyecto</button>
 </nav>
@@ -94,12 +95,50 @@
       </section>
     }
 
-    <!-- ===================== PÁGINA ===================== -->
-    @case ('pagina') {
+    <!-- ===================== ESTILO ===================== -->
+    @case ('estilo') {
+      @let st = store.style();
+      <section class="card">
+        <h3>Plantillas</h3>
+        <p class="help">Cambian colores, tipografías, decoraciones y formas. Tus fechas, textos y fotos se conservan.</p>
+        <div class="themes">
+          @for (t of store.themes(); track t.id) {
+            <div class="theme" [class.on]="st.themeId === t.id">
+              <button type="button" class="theme-main" (click)="applyTheme(t)" [title]="t.description">
+                <span class="swatches">
+                  @for (c of swatches(t); track $index) {
+                    <i [style.background]="c"></i>
+                  }
+                </span>
+                <strong>{{ t.name }}</strong>
+                <small>{{ t.fonts.main }} · {{ t.fonts.script }}</small>
+              </button>
+              @if (t.custom) {
+                <button type="button" class="icon-btn del" title="Quitar plantilla" (click)="store.removeCustomTheme(t.id)">✕</button>
+              }
+            </div>
+          }
+        </div>
+        <div class="save-theme">
+          <input placeholder="Nombre de tu plantilla" [value]="themeName()" (input)="themeName.set(val($event))" />
+          <button type="button" class="btn" (click)="saveTheme()">Guardar</button>
+          <label class="btn">
+            Cargar
+            <input type="file" accept=".json,application/json" (change)="loadTheme($event)" hidden />
+          </label>
+        </div>
+        <label class="check">
+          <input type="checkbox" [checked]="themeWithBg()" (change)="themeWithBg.set(!themeWithBg())" />
+          Incluir los fondos de imagen al guardar
+        </label>
+        @if (themeMsg(); as msg) {
+          <div class="notice" [class.warn]="msg.error">{{ msg.text }}</div>
+        }
+      </section>
+
       <section class="card">
         <h3>Diseño general</h3>
-        <p class="help">Aplica a las 14 páginas.</p>
-        <div class="field">Tipografía general
+                <div class="field">Tipografía general
           <app-search-select [options]="mainFontOptions" [value]="store.fontMain()" [bigPreview]="true" searchPlaceholder="Buscar fuente…" (visibleChange)="previewFonts($event)" (valueChange)="store.fontMain.set($event)" />
         </div>
         <div class="field">Tipografía cursiva (nombres y frases)
@@ -124,6 +163,93 @@
         </div>
       </section>
 
+
+      <section class="card">
+        <h3>Detalles del diseño</h3>
+        <div class="field">Decoración
+          <app-search-select [options]="decorOptions" [value]="st.decor" (valueChange)="store.updateStyle({ decor: asDecor($event) })" />
+        </div>
+        <div class="field">Etiquetas de los nombres
+          <div class="seg three">
+            @for (o of labelOptions; track o.value) {
+              <button type="button" [class.on]="st.labelStyle === o.value" (click)="store.updateStyle({ labelStyle: o.value })">{{ o.label }}</button>
+            }
+          </div>
+        </div>
+        @if (store.showPhotos()) {
+          <div class="field">Forma de las fotos
+            <div class="seg three">
+              @for (o of photoShapeOptions; track o.value) {
+                <button type="button" [class.on]="st.photoShape === o.value" (click)="store.updateStyle({ photoShape: o.value })">{{ o.label }}</button>
+              }
+            </div>
+          </div>
+        }
+        <div class="field">Foto de portada y contraportada
+          <div class="seg three">
+            @for (o of frameOptions; track o.value) {
+              <button type="button" [class.on]="st.coverFrame === o.value" (click)="store.updateStyle({ coverFrame: o.value })">{{ o.label }}</button>
+            }
+          </div>
+        </div>
+        <div class="field">Nombre del mes
+          <div class="seg">
+            <button type="button" [class.on]="st.titleUpper" (click)="store.updateStyle({ titleUpper: true })">MAYÚSCULAS</button>
+            <button type="button" [class.on]="!st.titleUpper" (click)="store.updateStyle({ titleUpper: false })">Normal</button>
+          </div>
+        </div>
+        <label class="field inline">Grosor del nombre del mes
+          <input type="range" min="300" max="700" step="100" [value]="st.titleWeight" (input)="store.updateStyle({ titleWeight: num($event) })" />
+        </label>
+        <label class="field inline">Espaciado del nombre del mes
+          <input type="range" min="0" max="0.4" step="0.01" [value]="st.titleSpacing" (input)="store.updateStyle({ titleSpacing: dec($event) })" />
+        </label>
+        <label class="field inline">Esquinas de las celdas: {{ st.cellRadius }} mm
+          <input type="range" min="0" max="5" step="0.2" [value]="st.cellRadius" (input)="store.updateStyle({ cellRadius: dec($event) })" />
+        </label>
+        <div class="colors">
+          <label>Texto <input type="color" [value]="st.ink" (input)="store.updateStyle({ ink: val($event) })" /></label>
+          <label>Texto suave <input type="color" [value]="st.inkSoft" (input)="store.updateStyle({ inkSoft: val($event) })" /></label>
+          <label>Fondo <input type="color" [value]="st.pageBg" (input)="store.updateStyle({ pageBg: val($event) })" /></label>
+        </div>
+        <div class="colors">
+          @for (c of st.decorColors; track $index) {
+            <label>Decoración {{ $index + 1 }} <input type="color" [value]="c" (input)="setDecorColor($index, val($event))" /></label>
+          }
+        </div>
+        <p class="help">Los colores de cada mes se ajustan en la pestaña <button type="button" class="link" (click)="tab.set('pagina')">Página</button>.</p>
+      </section>
+
+      <section class="card">
+        <h3>Fondos desde Canva</h3>
+        <p class="help">En Canva crea un diseño de <strong>21 × 15 cm</strong> (2480 × 1772 px), deja libre la zona de la cuadrícula
+          y descárgalo como PNG o JPG. En las páginas con fondo se ocultan las decoraciones de la plantilla.</p>
+        <div class="field">Fondo para todos los meses
+          <app-photo-editor [photo]="st.background" [maxSide]="2600" (photoChange)="store.updateStyle({ background: $event })" />
+        </div>
+        <p class="help">Cada mes, la portada y la contraportada pueden tener su propio fondo desde la pestaña
+          <button type="button" class="link" (click)="tab.set('pagina')">Página</button>.</p>
+        <label class="field inline">Opacidad de las celdas: {{ pct(st.cellAlpha) }}
+          <input type="range" min="0" max="1" step="0.05" [value]="st.cellAlpha" (input)="store.updateStyle({ cellAlpha: dec($event) })" />
+        </label>
+        <label class="check">
+          <input type="checkbox" [checked]="st.cellBorder" (change)="store.updateStyle({ cellBorder: !st.cellBorder })" />
+          Borde en las celdas
+        </label>
+        <label class="field inline">Mover calendario horizontal: {{ st.contentX }} mm
+          <input type="range" min="-10" max="10" step="0.5" [value]="st.contentX" (input)="store.updateStyle({ contentX: dec($event) })" />
+        </label>
+        <label class="field inline">Mover calendario vertical: {{ st.contentY }} mm
+          <input type="range" min="-10" max="10" step="0.5" [value]="st.contentY" (input)="store.updateStyle({ contentY: dec($event) })" />
+        </label>
+        @if (st.contentX || st.contentY) {
+          <button type="button" class="link" (click)="store.updateStyle({ contentX: 0, contentY: 0 })">Volver a la posición original</button>
+        }
+      </section>
+    }
+
+    <!-- ===================== PÁGINA ===================== -->
+    @case ('pagina') {
       @switch (pageKind()) {
         @case ('cover') {
           <section class="card">
@@ -138,6 +264,9 @@
             <label class="field inline">Color de la cinta del título
               <input type="color" [value]="store.cover().tagColor" (input)="store.updateCover({ tagColor: val($event) })" />
             </label>
+            <div class="field">Fondo de la portada (opcional, p. ej. de Canva)
+              <app-photo-editor [photo]="store.cover().background" [maxSide]="2600" (photoChange)="store.updateCover({ background: $event })" />
+            </div>
           </section>
         }
         @case ('back') {
@@ -149,6 +278,9 @@
             <label class="field">Texto
               <input [value]="store.back().label" (input)="store.updateBack({ label: val($event) })" />
             </label>
+            <div class="field">Fondo de la contraportada (opcional)
+              <app-photo-editor [photo]="store.back().background" [maxSide]="2600" (photoChange)="store.updateBack({ background: $event })" />
+            </div>
           </section>
         }
         @default {
@@ -167,6 +299,9 @@
               <label>Celdas <input type="color" [value]="m.base" (input)="store.updateMonth(i, { base: val($event) })" /></label>
               <label>Etiquetas <input type="color" [value]="m.accent" (input)="store.updateMonth(i, { accent: val($event) })" /></label>
               <label>Festivos <input type="color" [value]="m.holiday" (input)="store.updateMonth(i, { holiday: val($event) })" /></label>
+            </div>
+            <div class="field">Fondo de este mes (opcional, reemplaza el fondo general)
+              <app-photo-editor [photo]="m.background" [maxSide]="2600" (photoChange)="store.updateMonth(i, { background: $event })" />
             </div>
             @if (store.showPhotos()) {
             <p class="help">Las fotos de este mes se cargan en la pestaña <button type="button" class="link" (click)="tab.set('fechas')">Fechas</button>, en cada cumpleaños o fallecimiento.</p>

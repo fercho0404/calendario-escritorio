@@ -1,15 +1,20 @@
 <div
   class="cal-page"
   [class.no-photos]="!store.showPhotos()"
+  [class.cell-border]="st().cellBorder"
+  [class]="'lbl-' + st().labelStyle + ' ph-' + st().photoShape"
   [style.--base]="cfg().base"
   [style.--accent]="cfg().accent"
   [style.--holiday]="cfg().holiday"
   [style.--bind]="store.bindingMm() + 'mm'"
 >
-  <div class="wash"></div>
+  @if (bgPhoto()) {
+    <div class="bg-image" [style]="bgStyle()"></div>
+  }
+  <app-decor [kind]="decorKind()" area="month" [bind]="store.bindingMm()" [colors]="st().decorColors" [monthBase]="cfg().base" />
   <app-binding-guide />
 
-  <div class="main">
+  <div class="main" [style.transform]="shift()">
     <header>
       <h1>{{ name() }}</h1>
       <p class="subtitle">{{ cfg().subtitle }}</p>
@@ -70,7 +75,7 @@
     <footer class="caption">{{ cfg().caption }}</footer>
   </div>
 
-  <div class="photos">
+  <div class="photos" [style.transform]="shift()">
     @for (p of photos(); track p.ev.id) {
       <div
         class="ph"

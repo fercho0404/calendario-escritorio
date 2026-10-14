@@ -3,13 +3,24 @@ import { CalendarStore } from '../core/calendar.store';
 import { downloadText } from '../core/image-utils';
 import { CSV_TEMPLATE, JSON_TEMPLATE, parseCsv, parseJson } from '../core/importer';
 import { daysInMonth } from '../core/calendar-utils';
-import { EVENT_TYPE_LABEL, EventType, MONTH_NAMES, Photo, ProjectData } from '../core/models';
+import {
+  CoverFrame,
+  DecorKind,
+  EVENT_TYPE_LABEL,
+  EventType,
+  LabelStyle,
+  MONTH_NAMES,
+  Photo,
+  PhotoShape,
+  ProjectData,
+} from '../core/models';
+import { THEME_FILE_APP, ThemeDef } from '../core/themes';
 import { FontDef, FontLoader, MAIN_FONTS, SCRIPT_FONTS } from '../core/fonts';
 import { SearchSelect, SelectOption } from '../shared/search-select';
 import { EventIcon } from '../shared/event-icon';
 import { PhotoEditor } from './photo-editor';
 
-type Tab = 'fechas' | 'pagina' | 'proyecto';
+type Tab = 'fechas' | 'estilo' | 'pagina' | 'proyecto';
 
 @Component({
   selector: 'app-editor-panel',
@@ -46,6 +57,92 @@ export class EditorPanel {
     { value: '4', label: 'Alta (~380 ppp)' },
   ];
   protected readonly filterValue = computed(() => String(this.filter()));
+
+  // ---- estilo ----
+  protected readonly decorOptions: SelectOption[] = [
+    { value: 'acuarela', label: 'Manchas de acuarela' },
+    { value: 'hojas', label: 'Ramitas de hojas' },
+    { value: 'confeti', label: 'Confeti' },
+    { value: 'estrellas', label: 'Destellos' },
+    { value: 'arcos', label: 'Arcoíris boho' },
+    { value: 'marco', label: 'Marco fino' },
+    { value: 'ninguna', label: 'Sin decoración' },
+  ];
+  protected readonly labelOptions: { value: LabelStyle; label: string }[] = [
+    { value: 'mancha', label: 'Mancha' },
+    { value: 'pastilla', label: 'Pastilla' },
+    { value: 'texto', label: 'Subrayado' },
+  ];
+  protected readonly photoShapeOptions: { value: PhotoShape; label: string }[] = [
+    { value: 'circulo', label: 'Círculo' },
+    { value: 'aro', label: 'Con aro' },
+    { value: 'redondeada', label: 'Cuadrada' },
+  ];
+  protected readonly frameOptions: { value: CoverFrame; label: string }[] = [
+    { value: 'polaroid', label: 'Polaroid' },
+    { value: 'arco', label: 'Arco' },
+    { value: 'simple', label: 'Simple' },
+  ];
+  protected readonly themeName = signal('');
+  protected readonly themeWithBg = signal(true);
+  protected readonly themeMsg = signal<{ text: string; error?: boolean } | null>(null);
+
+  protected swatches(t: ThemeDef): string[] {
+    const c = t.colors;
+    return [c[0][0], c[0][1], c[3 % c.length][1], c[6 % c.length][1], t.style.decorColors[0]];
+  }
+
+  protected applyTheme(t: ThemeDef) {
+    this.store.applyTheme(t);
+    this.themeMsg.set(null);
+  }
+
+  protected asDecor(v: string) {
+    return v as DecorKind;
+  }
+
+  protected dec(ev: Event): number {
+    return parseFloat((ev.target as HTMLInputElement).value);
+  }
+
+  protected pct(v: number) {
+    return `${Math.round(v * 100)}%`;
+  }
+
+  protected setDecorColor(i: number, color: string) {
+    const cur = [...this.store.style().decorColors] as [string, string, string];
+    cur[i] = color;
+    this.store.updateStyle({ decorColors: cur });
+  }
+
+  protected saveTheme() {
+    const name = this.themeName().trim() || 'Mi plantilla';
+    const theme = this.store.currentAsTheme(name, this.themeWithBg());
+    const slug = name
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/gi, '-')
+      .toLowerCase();
+    downloadText(`plantilla-${slug}.json`, JSON.stringify({ app: THEME_FILE_APP, version: 1, theme }), 'application/json');
+    this.store.customThemes.update((l) => [...l, theme]);
+    this.store.updateStyle({ themeId: theme.id });
+    this.themeName.set('');
+    this.themeMsg.set({ text: `Plantilla "${name}" descargada y agregada a tu lista.` });
+  }
+
+  protected async loadTheme(ev: Event) {
+    const inputEl = ev.target as HTMLInputElement;
+    const file = inputEl.files?.[0];
+    inputEl.value = '';
+    if (!file) return;
+    try {
+      const theme = this.store.addCustomTheme(JSON.parse(await file.text()));
+      this.store.applyTheme(theme);
+      this.themeMsg.set({ text: `Plantilla "${theme.name}" cargada y aplicada.` });
+    } catch {
+      this.themeMsg.set({ text: 'El archivo no es una plantilla válida.', error: true });
+    }
+  }
 
   protected previewFonts(opts: SelectOption[]) {
     opts.forEach((o) => o.font && this.fonts.preview(o.font));

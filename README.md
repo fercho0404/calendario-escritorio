@@ -19,6 +19,12 @@ App web en Angular 22 para diseñar un calendario de escritorio familiar de **21
 - **Exportar a PDF** de 210 × 150 mm por página.
 - Descargar / abrir el proyecto completo (incluye fotos) como `.json`.
 
+## Plantillas y fondos
+
+- **6 plantillas incluidas**: Acuarela, Minimalista, Floral, Boho terracota, Infantil y Elegante. Cambian colores, tipografías, decoraciones, forma de etiquetas y fotos, y el marco de portada. Las fechas, textos y fotos se conservan.
+- **Plantillas propias**: guarda el estilo actual como `.json` (opcionalmente con fondos) y cárgalo después o compártelo.
+- **Fondos desde Canva**: diseña un lienzo de 21 × 15 cm (2480 × 1772 px), descárgalo como PNG o JPG y súbelo como fondo general de los meses, de un mes específico, de la portada o de la contraportada. Se puede ajustar la opacidad de las celdas, agregar bordes y mover la cuadrícula para que encaje con el diseño.
+
 ## Formato de fechas
 
 CSV (separado por `,` o `;`):

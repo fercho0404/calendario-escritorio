@@ -4,7 +4,9 @@ import { DayCell, buildMonthGrid, daysInMonth } from '../core/calendar-utils';
 import { CalEvent, MONTH_NAMES, weekdayNames } from '../core/models';
 import { EventIcon } from '../shared/event-icon';
 import { PhotoBox } from '../shared/photo-box';
+import { photoBackground } from '../core/image-utils';
 import { BindingGuide } from './binding-guide';
+import { Decor } from './decor';
 
 /** Medidas fijas del layout en mm (ver month-page.scss). */
 const PAD_LEFT = 11;
@@ -47,7 +49,7 @@ function wrapName(name: string, max = 12): string[] {
 @Component({
   selector: 'app-month-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [EventIcon, PhotoBox, BindingGuide],
+  imports: [EventIcon, PhotoBox, BindingGuide, Decor],
   templateUrl: './month-page.html',
   styleUrl: './month-page.scss',
 })
@@ -57,7 +59,21 @@ export class MonthPage {
   readonly month = input.required<number>();
 
   protected readonly weekdays = computed(() => weekdayNames(this.store.weekStart()));
-  protected readonly name = computed(() => MONTH_NAMES[this.month() - 1].toUpperCase());
+  protected readonly name = computed(() => MONTH_NAMES[this.month() - 1]);
+  protected readonly st = computed(() => this.store.style());
+
+  /** Fondo de imagen: el del mes o, si no tiene, el general. */
+  protected readonly bgPhoto = computed(() => this.cfg().background ?? this.st().background);
+  protected readonly bgStyle = computed(() => {
+    const p = this.bgPhoto();
+    return p ? photoBackground(p, 210 / 150) : {};
+  });
+  /** Con fondo propio no se dibujan las decoraciones de la plantilla. */
+  protected readonly decorKind = computed(() => (this.bgPhoto() ? 'ninguna' : this.st().decor));
+  protected readonly shift = computed(() => {
+    const s = this.st();
+    return s.contentX || s.contentY ? `translate(${s.contentX}mm, ${s.contentY}mm)` : null;
+  });
   protected readonly cfg = computed(() => this.store.months()[this.month() - 1]);
 
   protected readonly rows = computed(() => this.cells().length / 7);
