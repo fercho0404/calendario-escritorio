@@ -118,6 +118,38 @@
 
     <!-- ===================== PÁGINA ===================== -->
     @case ('pagina') {
+      <section class="card">
+        <h3>Diseño general</h3>
+        <p class="help">Aplica a las 14 páginas.</p>
+        <label class="field">Tipografía general
+          <select class="font-select" [style.font-family]="'&quot;' + store.fontMain() + '&quot;'" (change)="store.fontMain.set(val($event))">
+            @for (f of mainFonts; track f.family) {
+              <option [value]="f.family" [selected]="store.fontMain() === f.family" [style.font-family]="'&quot;' + f.family + '&quot;'">{{ f.name }}</option>
+            }
+          </select>
+        </label>
+        <label class="field">Tipografía cursiva (nombres y frases)
+          <select class="font-select script" [style.font-family]="'&quot;' + store.fontScript() + '&quot;'" (change)="store.fontScript.set(val($event))">
+            @for (f of scriptFonts; track f.family) {
+              <option [value]="f.family" [selected]="store.fontScript() === f.family" [style.font-family]="'&quot;' + f.family + '&quot;'">{{ f.name }}</option>
+            }
+          </select>
+        </label>
+        <label class="field">Tipografía de la firma de portada
+          <select class="font-select script" [style.font-family]="'&quot;' + store.fontCover() + '&quot;'" (change)="store.fontCover.set(val($event))">
+            @for (f of scriptFonts; track f.family) {
+              <option [value]="f.family" [selected]="store.fontCover() === f.family" [style.font-family]="'&quot;' + f.family + '&quot;'">{{ f.name }}</option>
+            }
+          </select>
+        </label>
+        <div class="field">La semana inicia el
+          <div class="seg">
+            <button type="button" [class.on]="store.weekStart() === 'lunes'" (click)="store.weekStart.set('lunes')">Lunes</button>
+            <button type="button" [class.on]="store.weekStart() === 'domingo'" (click)="store.weekStart.set('domingo')">Domingo</button>
+          </div>
+        </div>
+      </section>
+
       @switch (pageKind()) {
         @case ('cover') {
           <section class="card">

@@ -44,9 +44,9 @@ const FRAME_BORDER = 2.6;
       background: #fff; padding: 2.6mm; box-sizing: border-box;
       box-shadow: 0 0.5mm 1.8mm rgba(60, 40, 35, .22); }
     .tag { position: absolute; left: 50%; transform: translateX(-50%); padding: 1.6mm 4.5mm;
-      font: 600 4.4mm/1 Montserrat, sans-serif; letter-spacing: .09em; color: #fff; white-space: nowrap;
+      font: 600 4.4mm/1 var(--font-main, Montserrat), sans-serif; letter-spacing: .09em; color: #fff; white-space: nowrap;
       box-shadow: 0 0.3mm 0.8mm rgba(0, 0, 0, .08); }
-    .label { position: absolute; right: 14mm; font-family: Allura, cursive; line-height: 1.1; color: #5a2a2e;
+    .label { position: absolute; right: 14mm; font-family: var(--font-cover, Allura), cursive; line-height: 1.1; color: #5a2a2e;
       white-space: nowrap; }
   `,
 })

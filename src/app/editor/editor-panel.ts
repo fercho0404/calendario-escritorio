@@ -3,7 +3,15 @@ import { CalendarStore } from '../core/calendar.store';
 import { downloadText } from '../core/image-utils';
 import { CSV_TEMPLATE, JSON_TEMPLATE, parseCsv, parseJson } from '../core/importer';
 import { daysInMonth } from '../core/calendar-utils';
-import { EVENT_TYPE_LABEL, EventType, MONTH_NAMES, Photo, ProjectData } from '../core/models';
+import {
+  EVENT_TYPE_LABEL,
+  EventType,
+  MAIN_FONTS,
+  MONTH_NAMES,
+  Photo,
+  ProjectData,
+  SCRIPT_FONTS,
+} from '../core/models';
 import { EventIcon } from '../shared/event-icon';
 import { PhotoEditor } from './photo-editor';
 
@@ -23,6 +31,8 @@ export class EditorPanel {
   protected readonly tab = signal<Tab>('fechas');
   protected readonly monthNames = MONTH_NAMES;
   protected readonly typeLabel = EVENT_TYPE_LABEL;
+  protected readonly mainFonts = MAIN_FONTS;
+  protected readonly scriptFonts = SCRIPT_FONTS;
   protected readonly types: EventType[] = ['cumpleanos', 'festivo', 'fallecimiento'];
 
   // ---- importación ----

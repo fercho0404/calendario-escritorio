@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { CalendarStore } from '../core/calendar.store';
 import { DayCell, buildMonthGrid, daysInMonth } from '../core/calendar-utils';
-import { CalEvent, MONTH_NAMES, WEEKDAYS } from '../core/models';
+import { CalEvent, MONTH_NAMES, weekdayNames } from '../core/models';
 import { EventIcon } from '../shared/event-icon';
 import { PhotoBox } from '../shared/photo-box';
 import { BindingGuide } from './binding-guide';
@@ -54,14 +54,14 @@ export class MonthPage {
   /** 1 - 12 */
   readonly month = input.required<number>();
 
-  protected readonly weekdays = WEEKDAYS;
+  protected readonly weekdays = computed(() => weekdayNames(this.store.weekStart()));
   protected readonly name = computed(() => MONTH_NAMES[this.month() - 1].toUpperCase());
   protected readonly cfg = computed(() => this.store.months()[this.month() - 1]);
 
   protected readonly rows = computed(() => this.cells().length / 7);
 
   protected readonly cells = computed<CellView[]>(() => {
-    const grid = buildMonthGrid(this.store.year(), this.month(), this.store.events());
+    const grid = buildMonthGrid(this.store.year(), this.month(), this.store.events(), this.store.weekStart());
     const rows = grid.length / 7;
     const gridH = 150 - this.store.bindingMm() - HEADER_AND_FOOTER;
     const cellH = (gridH - (rows - 1) * GRID_GAP) / rows;

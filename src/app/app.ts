@@ -108,7 +108,8 @@ export class App {
       const root = this.exportRoot()?.nativeElement;
       if (!root) throw new Error('Sin contenedor de exportación');
       const pages = Array.from(root.querySelectorAll<HTMLElement>('.calendar-page'));
-      await exportPagesToPdf(pages, `calendario-${this.store.year()}.pdf`, scale, (done, total) =>
+      const fonts = { main: this.store.fontMain(), script: this.store.fontScript(), cover: this.store.fontCover() };
+      await exportPagesToPdf(pages, `calendario-${this.store.year()}.pdf`, scale, fonts, (done, total) =>
         this.progress.set({ done, total }),
       );
     } catch (e) {

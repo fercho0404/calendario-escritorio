@@ -50,11 +50,48 @@ export interface BackConfig {
   label: string;
 }
 
+export type WeekStart = 'lunes' | 'domingo';
+
+export interface FontOption {
+  name: string;
+  /** valor de font-family */
+  family: string;
+}
+
+/** Tipografía principal: títulos, números, días y textos. */
+export const MAIN_FONTS: FontOption[] = [
+  { name: 'Montserrat', family: 'Montserrat' },
+  { name: 'Poppins', family: 'Poppins' },
+  { name: 'Raleway', family: 'Raleway' },
+  { name: 'Lato', family: 'Lato' },
+  { name: 'Josefin Sans', family: 'Josefin Sans' },
+  { name: 'Quicksand', family: 'Quicksand' },
+  { name: 'Nunito', family: 'Nunito' },
+  { name: 'Playfair Display (serif)', family: 'Playfair Display' },
+  { name: 'Lora (serif)', family: 'Lora' },
+];
+
+/** Tipografía cursiva: nombres en las celdas, frase del mes y firma de la portada. */
+export const SCRIPT_FONTS: FontOption[] = [
+  { name: 'Dancing Script', family: 'Dancing Script' },
+  { name: 'Allura', family: 'Allura' },
+  { name: 'Great Vibes', family: 'Great Vibes' },
+  { name: 'Sacramento', family: 'Sacramento' },
+  { name: 'Parisienne', family: 'Parisienne' },
+  { name: 'Satisfy', family: 'Satisfy' },
+  { name: 'Pacifico', family: 'Pacifico' },
+  { name: 'Caveat', family: 'Caveat' },
+];
+
 export interface ProjectData {
   app: 'calendario-escritorio';
   version: 1;
   year: number;
   bindingMm: number;
+  weekStart?: WeekStart;
+  fontMain?: string;
+  fontScript?: string;
+  fontCover?: string;
   events: CalEvent[];
   months: MonthConfig[];
   cover: CoverConfig;
@@ -67,6 +104,10 @@ export const MONTH_NAMES = [
 ];
 
 export const WEEKDAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+
+export function weekdayNames(start: WeekStart): string[] {
+  return start === 'domingo' ? [WEEKDAYS[6], ...WEEKDAYS.slice(0, 6)] : WEEKDAYS;
+}
 
 /** Medidas físicas de la página (calendario de escritorio). */
 export const PAGE_W_MM = 210;

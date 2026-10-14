@@ -1,12 +1,13 @@
-import { CalEvent, newId } from './models';
+import { CalEvent, WeekStart, newId } from './models';
 
 export function daysInMonth(year: number, month: number): number {
   return new Date(year, month, 0).getDate();
 }
 
-/** Día de la semana con lunes = 0 ... domingo = 6 */
-export function mondayIndex(year: number, month: number, day: number): number {
-  return (new Date(year, month - 1, day).getDay() + 6) % 7;
+/** Columna del día dentro de la semana (0 = primera columna). */
+export function weekColumn(year: number, month: number, day: number, start: WeekStart): number {
+  const wd = new Date(year, month - 1, day).getDay(); // domingo = 0
+  return start === 'domingo' ? wd : (wd + 6) % 7;
 }
 
 export interface DayCell {
@@ -16,10 +17,15 @@ export interface DayCell {
   deaths: CalEvent[];
 }
 
-/** Construye la cuadrícula del mes (semanas que empiezan en lunes). */
-export function buildMonthGrid(year: number, month: number, events: CalEvent[]): DayCell[] {
+/** Construye la cuadrícula del mes (semanas que empiezan en lunes o domingo). */
+export function buildMonthGrid(
+  year: number,
+  month: number,
+  events: CalEvent[],
+  start: WeekStart = 'lunes',
+): DayCell[] {
   const total = daysInMonth(year, month);
-  const lead = mondayIndex(year, month, 1);
+  const lead = weekColumn(year, month, 1, start);
   const cells: DayCell[] = [];
   for (let i = 0; i < lead; i++) cells.push({ day: null, festivos: [], births: [], deaths: [] });
   for (let d = 1; d <= total; d++) {

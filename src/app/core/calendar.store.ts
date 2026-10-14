@@ -6,6 +6,7 @@ import {
   CoverConfig,
   MonthConfig,
   ProjectData,
+  WeekStart,
   defaultBack,
   defaultCover,
   defaultMonths,
@@ -24,6 +25,10 @@ function defaultYear(): number {
 export class CalendarStore {
   readonly year = signal(defaultYear());
   readonly bindingMm = signal(15);
+  readonly weekStart = signal<WeekStart>('lunes');
+  readonly fontMain = signal('Montserrat');
+  readonly fontScript = signal('Dancing Script');
+  readonly fontCover = signal('Allura');
   readonly events = signal<CalEvent[]>([]);
   readonly months = signal<MonthConfig[]>(defaultMonths());
   readonly cover = signal<CoverConfig>(defaultCover());
@@ -69,6 +74,10 @@ export class CalendarStore {
       version: 1,
       year: this.year(),
       bindingMm: this.bindingMm(),
+      weekStart: this.weekStart(),
+      fontMain: this.fontMain(),
+      fontScript: this.fontScript(),
+      fontCover: this.fontCover(),
       events: this.events(),
       months: this.months(),
       cover: this.cover(),
@@ -79,6 +88,10 @@ export class CalendarStore {
   applyProject(p: Partial<ProjectData>) {
     if (p.year) this.year.set(p.year);
     if (p.bindingMm) this.bindingMm.set(p.bindingMm);
+    if (p.weekStart) this.weekStart.set(p.weekStart);
+    if (p.fontMain) this.fontMain.set(p.fontMain);
+    if (p.fontScript) this.fontScript.set(p.fontScript);
+    if (p.fontCover) this.fontCover.set(p.fontCover);
     if (Array.isArray(p.events)) this.events.set(p.events);
     if (Array.isArray(p.months) && p.months.length === 12) {
       const defs = defaultMonths();
@@ -91,6 +104,10 @@ export class CalendarStore {
   reset() {
     this.year.set(defaultYear());
     this.bindingMm.set(15);
+    this.weekStart.set('lunes');
+    this.fontMain.set('Montserrat');
+    this.fontScript.set('Dancing Script');
+    this.fontCover.set('Allura');
     this.events.set([]);
     this.months.set(defaultMonths());
     this.cover.set(defaultCover());

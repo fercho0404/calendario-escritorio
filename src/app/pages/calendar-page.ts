@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
+import { CalendarStore } from '../core/calendar.store';
 import { BackPage } from './back-page';
 import { CoverPage } from './cover-page';
 import { MonthPage } from './month-page';
@@ -8,7 +9,12 @@ import { MonthPage } from './month-page';
   selector: 'app-calendar-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CoverPage, MonthPage, BackPage],
-  host: { class: 'calendar-page' },
+  host: {
+    class: 'calendar-page',
+    '[style.--font-main]': 'quote(store.fontMain())',
+    '[style.--font-script]': 'quote(store.fontScript())',
+    '[style.--font-cover]': 'quote(store.fontCover())',
+  },
   styles: `:host { display: block; width: 210mm; height: 150mm; }`,
   template: `
     @if (index() === 0) {
@@ -22,4 +28,8 @@ import { MonthPage } from './month-page';
 })
 export class CalendarPage {
   readonly index = input.required<number>();
+  protected readonly store = inject(CalendarStore);
+  protected quote(family: string) {
+    return `"${family}"`;
+  }
 }

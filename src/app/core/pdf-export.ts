@@ -1,13 +1,5 @@
 import { PAGE_H_MM, PAGE_W_MM } from './models';
 
-const FONTS = [
-  '300 20px Montserrat',
-  '400 20px Montserrat',
-  '500 20px Montserrat',
-  '600 20px Montserrat',
-  '400 20px "Dancing Script"',
-  '400 20px Allura',
-];
 
 /**
  * Exporta cada elemento (una página de 21 x 15 cm) a una hoja del PDF.
@@ -17,10 +9,16 @@ export async function exportPagesToPdf(
   pages: HTMLElement[],
   fileName: string,
   scale: number,
+  fonts: { main: string; script: string; cover: string },
   onProgress: (done: number, total: number) => void,
 ): Promise<void> {
   const [{ jsPDF }, { default: html2canvas }] = await Promise.all([import('jspdf'), import('html2canvas-pro')]);
-  await Promise.all(FONTS.map((f) => document.fonts.load(f)));
+  const specs = [
+    ...[300, 400, 500, 600].map((w) => `${w} 20px "${fonts.main}"`),
+    `400 20px "${fonts.script}"`,
+    `400 20px "${fonts.cover}"`,
+  ];
+  await Promise.all(specs.map((f) => document.fonts.load(f).catch(() => [])));
   await document.fonts.ready;
 
   const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [PAGE_W_MM, PAGE_H_MM], compress: true });

@@ -30,7 +30,7 @@ const PHOTO_W = 146;
   styles: `
     :host { display: block; }
     .cal-page { position: relative; width: 210mm; height: 150mm; overflow: hidden; background: #fbf8f1;
-      font-family: Montserrat, sans-serif; color: #4f3a37; }
+      font-family: var(--font-main, Montserrat), sans-serif; color: #4f3a37; }
     .disc { position: absolute; border-radius: 50%; }
     .d1 { right: 18mm; width: 58mm; height: 58mm; background: #d8b9b3; opacity: .8; }
     .d2 { left: 22mm; bottom: 24mm; width: 46mm; height: 46mm; background: #e2dcd9; }
