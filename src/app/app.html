@@ -1,0 +1,93 @@
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">▦</span>
+    <div>
+      <strong>Calendario de escritorio</strong>
+      <small>21 × 15 cm · 14 páginas</small>
+    </div>
+  </div>
+
+  <div class="year">
+    <button type="button" (click)="store.setYear(store.year() - 1)" aria-label="Año anterior">‹</button>
+    <input type="number" [value]="store.year()" (change)="setYear($event)" aria-label="Año" />
+    <button type="button" (click)="store.setYear(store.year() + 1)" aria-label="Año siguiente">›</button>
+  </div>
+
+  <div class="actions">
+    <div class="seg">
+      <button type="button" [class.on]="view() === 'page'" (click)="view.set('page')">Página</button>
+      <button type="button" [class.on]="view() === 'grid'" (click)="view.set('grid')">Todas</button>
+    </div>
+    <button type="button" class="export" (click)="exportPdf()" [disabled]="exporting()">Exportar PDF</button>
+  </div>
+</header>
+
+<main class="workspace">
+  <aside class="sidebar">
+    <app-editor-panel (exportPdf)="exportPdf($event)" />
+  </aside>
+
+  <section class="preview">
+    <div class="stage" #stage>
+      @if (view() === 'page') {
+        <div class="page-holder" [style.width.px]="pageW * scale()" [style.height.px]="pageH * scale()">
+          <div class="scaler" [style.transform]="'scale(' + scale() + ')'">
+            <app-calendar-page [index]="store.page()" />
+          </div>
+        </div>
+        <button type="button" class="nav prev" (click)="go(-1)" [disabled]="store.page() === 0" aria-label="Anterior">‹</button>
+        <button type="button" class="nav next" (click)="go(1)" [disabled]="store.page() === 13" aria-label="Siguiente">›</button>
+        <div class="page-title">{{ pageTitle() }} · {{ store.page() + 1 }}/14</div>
+      } @else {
+        <div class="all">
+          @for (i of pages; track i) {
+            <button
+              type="button"
+              class="all-item"
+              [class.on]="store.page() === i"
+              (click)="select(i)"
+              [style.width.px]="pageW * gridScale()"
+              [style.height.px]="pageH * gridScale()"
+            >
+              <div class="scaler" [style.transform]="'scale(' + gridScale() + ')'">
+                <app-calendar-page [index]="i" />
+              </div>
+            </button>
+          }
+        </div>
+      }
+    </div>
+
+    @if (view() === 'page') {
+      <nav class="thumbs">
+        @for (i of pages; track i) {
+          <button type="button" class="thumb" [class.on]="store.page() === i" (click)="store.page.set(i)">
+            <div class="thumb-page" [style.width.px]="pageW * thumbScale" [style.height.px]="pageH * thumbScale">
+              <div class="scaler" [style.transform]="'scale(' + thumbScale + ')'">
+                <app-calendar-page [index]="i" />
+              </div>
+            </div>
+            <span>{{ label(i) }}</span>
+          </button>
+        }
+      </nav>
+    }
+  </section>
+</main>
+
+@if (exporting()) {
+  <!-- Páginas a tamaño real (sin escalar) para la exportación -->
+  <div class="export-root" #exportRoot aria-hidden="true">
+    @for (i of pages; track i) {
+      <app-calendar-page [index]="i" />
+    }
+  </div>
+  <div class="export-overlay">
+    <div class="box">
+      <div class="spinner"></div>
+      <strong>Generando PDF…</strong>
+      <span>Página {{ progress().done }} de {{ progress().total }}</span>
+      <div class="bar"><i [style.width.%]="(progress().done / progress().total) * 100"></i></div>
+    </div>
+  </div>
+}

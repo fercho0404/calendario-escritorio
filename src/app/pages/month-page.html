@@ -1,0 +1,90 @@
+<div
+  class="cal-page"
+  [style.--base]="cfg().base"
+  [style.--accent]="cfg().accent"
+  [style.--holiday]="cfg().holiday"
+  [style.--bind]="store.bindingMm() + 'mm'"
+>
+  <div class="wash"></div>
+  <app-binding-guide />
+
+  <div class="main">
+    <header>
+      <h1>{{ name() }}</h1>
+      <p class="subtitle">{{ cfg().subtitle }}</p>
+    </header>
+
+    <div class="weekdays">
+      @for (w of weekdays; track w) {
+        <span>{{ w }}</span>
+      }
+    </div>
+
+    <div class="grid" [style.grid-template-rows]="'repeat(' + rows() + ', 1fr)'">
+      @for (c of cells(); track $index) {
+        <div class="cell" [class.blank]="!c.day" [class.holiday]="c.festivos.length > 0">
+          @if (c.day) {
+            <span class="num">{{ c.day }}</span>
+
+            <div class="icons">
+              @if (c.births.length) {
+                <app-event-icon type="cumpleanos" class="ic ic-bday" />
+              }
+              @if (c.deaths.length) {
+                <app-event-icon type="fallecimiento" class="ic ic-death" />
+              }
+              @if (c.festivos.length && !c.births.length && !c.deaths.length) {
+                <app-event-icon type="festivo" class="ic ic-fest" />
+              }
+            </div>
+
+            <div class="labels" [style.font-size.mm]="c.fontMm">
+              @if (c.festivos.length) {
+                <div class="fest">
+                  @for (l of linesOf(c.festLines); track $index) {
+                    <span>{{ l }}</span>
+                  }
+                </div>
+              }
+              @if (c.births.length) {
+                <div class="blob">
+                  @for (l of linesOf(c.birthLines); track $index) {
+                    <span>{{ l }}</span>
+                  }
+                </div>
+              }
+              @if (c.deaths.length) {
+                <div class="blob death">
+                  @for (l of linesOf(c.deathLines); track $index) {
+                    <span>{{ l }}</span>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <footer class="caption">{{ cfg().caption }}</footer>
+  </div>
+
+  <div class="photos">
+    @for (p of photos(); track p.ev.id) {
+      <div
+        class="ph"
+        [class.death]="p.ev.type === 'fallecimiento'"
+        [style.left.mm]="p.x"
+        [style.top.mm]="p.y"
+        [style.width.mm]="p.d"
+        [style.height.mm]="p.d"
+        [title]="p.ev.name + ' · ' + p.ev.day"
+      >
+        <app-photo-box [photo]="p.ev.photo" [aspect]="1" />
+        @if (p.ev.type === 'fallecimiento') {
+          <app-event-icon type="fallecimiento" class="badge" />
+        }
+      </div>
+    }
+  </div>
+</div>

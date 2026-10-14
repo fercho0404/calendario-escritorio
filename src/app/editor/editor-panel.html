@@ -1,0 +1,216 @@
+<nav class="tabs">
+  <button type="button" [class.on]="tab() === 'fechas'" (click)="tab.set('fechas')">Fechas</button>
+  <button type="button" [class.on]="tab() === 'pagina'" (click)="tab.set('pagina')">Página</button>
+  <button type="button" [class.on]="tab() === 'proyecto'" (click)="tab.set('proyecto')">Proyecto</button>
+</nav>
+
+<div class="body">
+  @switch (tab()) {
+    <!-- ===================== FECHAS ===================== -->
+    @case ('fechas') {
+      <section class="card">
+        <h3>Cargar fechas (CSV o JSON)</h3>
+        <p class="help">Columnas: <code>nombre</code>, <code>mes</code>, <code>dia</code>, <code>tipo</code>
+          (cumpleaños, festivo o fallecimiento). También acepta <code>fecha</code> como <code>MM-DD</code> o <code>DD/MM</code>.</p>
+        <div class="row wrap">
+          <label class="btn primary">
+            Seleccionar archivo
+            <input type="file" accept=".csv,.json,.txt,text/csv,application/json" (change)="onImport($event)" hidden />
+          </label>
+          <label class="check">
+            <input type="checkbox" [checked]="replaceOnImport()" (change)="replaceOnImport.set(!replaceOnImport())" />
+            Reemplazar las fechas actuales
+          </label>
+        </div>
+        <div class="row small">
+          Plantillas:
+          <button type="button" class="link" (click)="downloadTemplate('csv')">CSV</button>
+          <button type="button" class="link" (click)="downloadTemplate('json')">JSON</button>
+        </div>
+        @if (importMsg(); as msg) {
+          <div class="notice" [class.warn]="msg.errors.length">
+            <strong>{{ msg.ok }}</strong>
+            @for (e of msg.errors; track $index) {
+              <div>{{ e }}</div>
+            }
+          </div>
+        }
+      </section>
+
+      <section class="card">
+        <h3>Festivos de Colombia {{ store.year() }}</h3>
+        <p class="help">Calcula los festivos oficiales del año (incluye Semana Santa y Ley Emiliani). Se recalculan si cambias el año.</p>
+        <div class="row">
+          <button type="button" class="btn" (click)="store.addColombianHolidays()">
+            {{ store.hasColombianHolidays() ? 'Recalcular festivos' : 'Agregar festivos' }}
+          </button>
+          @if (store.hasColombianHolidays()) {
+            <button type="button" class="link danger" (click)="store.removeColombianHolidays()">Quitar</button>
+          }
+        </div>
+      </section>
+
+      <section class="card">
+        <h3>Agregar fecha</h3>
+        <div class="add">
+          <input class="name" placeholder="Nombre / etiqueta" [value]="draftName()" (input)="draftName.set(val($event))"
+            (keydown.enter)="addDraft()" />
+          <select [value]="draftMonth()" (change)="draftMonth.set(num($event))">
+            @for (m of monthNames; track m; let i = $index) {
+              <option [value]="i + 1" [selected]="draftMonth() === i + 1">{{ m }}</option>
+            }
+          </select>
+          <input type="number" min="1" [max]="maxDay(draftMonth())" [value]="draftDay()" (input)="draftDay.set(num($event))" />
+          <select (change)="draftType.set($any(val($event)))">
+            @for (t of types; track t) {
+              <option [value]="t" [selected]="draftType() === t">{{ typeLabel[t] }}</option>
+            }
+          </select>
+          <button type="button" class="btn primary" (click)="addDraft()" [disabled]="!draftName().trim()">Agregar</button>
+        </div>
+      </section>
+
+      <section class="card list-card">
+        <div class="list-head">
+          <h3>Fechas ({{ visibleEvents().length }})</h3>
+          <select (change)="setFilter($event)">
+            <option value="auto" [selected]="filter() === 'auto'">Mes de la página visible</option>
+            <option value="all" [selected]="filter() === 'all'">Todos los meses</option>
+            @for (m of monthNames; track m; let i = $index) {
+              <option [value]="i + 1" [selected]="filter() === i + 1">{{ m }}</option>
+            }
+          </select>
+        </div>
+        @if (!visibleEvents().length) {
+          <p class="help">No hay fechas {{ filterMonth() ? 'en ' + monthNames[filterMonth()! - 1] : 'cargadas' }}.</p>
+        }
+        @for (e of visibleEvents(); track e.id) {
+          <div class="ev" [class.invalid]="isInvalid(e.id)">
+            <div class="ev-top">
+              <app-event-icon [type]="e.type" class="ev-icon" />
+              <input class="name" [value]="e.name" (change)="store.updateEvent(e.id, { name: val($event) })" />
+              <button type="button" class="icon-btn" title="Eliminar" (click)="store.removeEvent(e.id)">✕</button>
+            </div>
+            <div class="ev-fields">
+              <select (change)="store.updateEvent(e.id, { month: num($event) })">
+                @for (m of monthNames; track m; let i = $index) {
+                  <option [value]="i + 1" [selected]="e.month === i + 1">{{ m }}</option>
+                }
+              </select>
+              <input type="number" min="1" [max]="maxDay(e.month)" [value]="e.day"
+                (change)="store.updateEvent(e.id, { day: num($event) })" />
+              <select (change)="store.updateEvent(e.id, { type: $any(val($event)) })">
+                @for (t of types; track t) {
+                  <option [value]="t" [selected]="e.type === t">{{ typeLabel[t] }}</option>
+                }
+              </select>
+            </div>
+            @if (e.type !== 'festivo') {
+              <app-photo-editor [photo]="e.photo" [round]="true" (photoChange)="setEventPhoto(e.id, $event)" />
+            }
+            @if (isInvalid(e.id)) {
+              <div class="warn-text">Esta fecha no existe en {{ store.year() }} y no se mostrará.</div>
+            }
+          </div>
+        }
+      </section>
+    }
+
+    <!-- ===================== PÁGINA ===================== -->
+    @case ('pagina') {
+      @switch (pageKind()) {
+        @case ('cover') {
+          <section class="card">
+            <h3>Portada</h3>
+            <p class="help">El título <strong>CALENDARIO {{ store.year() }}</strong> se genera con el año elegido.</p>
+            <div class="field">Foto
+              <app-photo-editor [photo]="store.cover().photo" (photoChange)="store.updateCover({ photo: $event })" />
+            </div>
+            <label class="field">Texto (firma)
+              <input [value]="store.cover().label" (input)="store.updateCover({ label: val($event) })" />
+            </label>
+            <label class="field inline">Color de la cinta del título
+              <input type="color" [value]="store.cover().tagColor" (input)="store.updateCover({ tagColor: val($event) })" />
+            </label>
+          </section>
+        }
+        @case ('back') {
+          <section class="card">
+            <h3>Contraportada</h3>
+            <div class="field">Foto
+              <app-photo-editor [photo]="store.back().photo" (photoChange)="store.updateBack({ photo: $event })" />
+            </div>
+            <label class="field">Texto
+              <input [value]="store.back().label" (input)="store.updateBack({ label: val($event) })" />
+            </label>
+          </section>
+        }
+        @default {
+          @let i = store.page() - 1;
+          @let m = store.months()[i];
+          <section class="card">
+            <h3>{{ monthNames[i] }} {{ store.year() }}</h3>
+            <label class="field">Frase bajo el mes
+              <input [value]="m.subtitle" (input)="store.updateMonth(i, { subtitle: val($event) })" />
+            </label>
+            <label class="field">Texto al pie (caption)
+              <input [value]="m.caption" placeholder="Ej: CADENA 1 : ANA MARIA GUERRERO"
+                (input)="store.updateMonth(i, { caption: val($event) })" />
+            </label>
+            <div class="colors">
+              <label>Celdas <input type="color" [value]="m.base" (input)="store.updateMonth(i, { base: val($event) })" /></label>
+              <label>Etiquetas <input type="color" [value]="m.accent" (input)="store.updateMonth(i, { accent: val($event) })" /></label>
+              <label>Festivos <input type="color" [value]="m.holiday" (input)="store.updateMonth(i, { holiday: val($event) })" /></label>
+            </div>
+            <p class="help">Las fotos de este mes se cargan en la pestaña <button type="button" class="link" (click)="tab.set('fechas')">Fechas</button>, en cada cumpleaños o fallecimiento.</p>
+          </section>
+        }
+      }
+
+      <section class="card">
+        <h3>Formato de impresión</h3>
+        <p class="help">Calendario de escritorio de 21 × 15 cm. Arriba se reserva un margen para el argollado.</p>
+        <label class="field inline">Margen de argollado: <strong>{{ store.bindingMm() }} mm</strong>
+          <input type="range" min="8" max="25" step="1" [value]="store.bindingMm()" (input)="store.bindingMm.set(num($event))" />
+        </label>
+        <label class="check">
+          <input type="checkbox" [checked]="store.showGuides()" (change)="store.showGuides.set(!store.showGuides())" />
+          Mostrar guía de argollado en la vista previa (no se exporta)
+        </label>
+      </section>
+    }
+
+    <!-- ===================== PROYECTO ===================== -->
+    @case ('proyecto') {
+      <section class="card">
+        <h3>Exportar a PDF</h3>
+        <p class="help">Genera 14 páginas de 21 × 15 cm: portada, 12 meses y contraportada.</p>
+        <label class="field inline">Calidad
+          <select (change)="pdfScale.set(num($event))">
+            <option value="2" [selected]="pdfScale() === 2">Borrador (~190 ppp)</option>
+            <option value="3" [selected]="pdfScale() === 3">Impresión (~290 ppp)</option>
+            <option value="4" [selected]="pdfScale() === 4">Alta (~380 ppp)</option>
+          </select>
+        </label>
+        <button type="button" class="btn primary" (click)="exportPdf.emit(pdfScale())">Exportar PDF</button>
+      </section>
+
+      <section class="card">
+        <h3>Guardar y abrir</h3>
+        <p class="help">El trabajo se guarda automáticamente en este navegador. Para moverlo a otro equipo, descarga el proyecto (incluye fotos).</p>
+        <div class="row wrap">
+          <button type="button" class="btn" (click)="saveProject()">Descargar proyecto</button>
+          <label class="btn">
+            Abrir proyecto
+            <input type="file" accept=".json" (change)="openProject($event)" hidden />
+          </label>
+        </div>
+      </section>
+
+      <section class="card">
+        <h3>Empezar de nuevo</h3>
+        <button type="button" class="btn danger" (click)="resetAll()">Borrar todo</button>
+      </section>
+    }
+  }
+</div>

@@ -1,0 +1,162 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  font-size: 13px;
+  color: var(--ui-ink);
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 10px 14px 0;
+  border-bottom: 1px solid var(--ui-line);
+  button {
+    flex: 1;
+    border: 0;
+    background: none;
+    padding: 9px 0 10px;
+    font: inherit;
+    font-weight: 600;
+    color: var(--ui-muted);
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    &.on { color: var(--ui-ink); border-bottom-color: var(--ui-accent); }
+  }
+}
+
+.body {
+  flex: 1;
+  overflow: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid var(--ui-line);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+h3 { margin: 0; font-size: 13px; font-weight: 700; }
+.help { margin: 0; color: var(--ui-muted); font-size: 12px; line-height: 1.45; }
+code { background: #f4efec; padding: 0 4px; border-radius: 3px; font-size: 11px; }
+
+.row { display: flex; align-items: center; gap: 10px; &.wrap { flex-wrap: wrap; } &.small { font-size: 12px; color: var(--ui-muted); } }
+
+.check { display: flex; align-items: center; gap: 6px; font-size: 12px; cursor: pointer; }
+
+.notice {
+  font-size: 12px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #eef6ee;
+  color: #2f5a35;
+  display: grid;
+  gap: 2px;
+  &.warn { background: #fdf3e6; color: #7a4a12; }
+}
+
+.add {
+  display: grid;
+  grid-template-columns: 1fr 1fr 60px;
+  gap: 6px;
+  .name { grid-column: 1 / -1; }
+  select:last-of-type { grid-column: 1 / 3; }
+}
+
+.list-card { gap: 10px; }
+.list-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; select { max-width: 60%; } }
+
+.ev {
+  border: 1px solid var(--ui-line);
+  border-radius: 8px;
+  padding: 8px;
+  display: grid;
+  gap: 6px;
+  &.invalid { border-color: #e2a35c; background: #fffaf3; }
+}
+.ev-top { display: flex; align-items: center; gap: 6px; .name { flex: 1; } }
+.ev-icon { width: 20px; height: 22px; flex: none; }
+.ev-fields { display: grid; grid-template-columns: 1.2fr 56px 1.2fr; gap: 6px; }
+.warn-text { color: #a35d12; font-size: 11px; }
+
+.field {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--ui-muted);
+  font-weight: 600;
+  &.inline { grid-template-columns: 1fr auto; align-items: center; }
+}
+
+.colors {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  label { display: grid; gap: 4px; font-size: 12px; color: var(--ui-muted); font-weight: 600; }
+  input { width: 100%; }
+}
+
+input:not([type='checkbox']):not([type='range']):not([type='color']),
+select {
+  font: inherit;
+  padding: 6px 8px;
+  border: 1px solid var(--ui-line);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--ui-ink);
+  min-width: 0;
+  &:focus { outline: 2px solid var(--ui-focus); outline-offset: -1px; }
+}
+
+input[type='color'] { height: 30px; border: 1px solid var(--ui-line); border-radius: 6px; padding: 2px; background: #fff; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 14px;
+  border-radius: 7px;
+  border: 1px solid var(--ui-line);
+  background: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--ui-ink);
+  &:hover { background: #f7f3f0; }
+  &.primary { background: var(--ui-accent); border-color: var(--ui-accent); color: #fff; &:hover { filter: brightness(1.07); } }
+  &.danger { color: #a3342b; }
+  &:disabled { opacity: .5; cursor: default; }
+}
+
+.link {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: 12px;
+  color: var(--ui-accent);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  &.danger { color: #a3342b; }
+}
+
+.icon-btn {
+  border: 0;
+  background: none;
+  color: var(--ui-muted);
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 5px;
+  &:hover { background: #f7ecea; color: #a3342b; }
+}
