@@ -13,7 +13,7 @@ import { PAGE_W_MM } from '../core/models';
       background: #3b3533; opacity: .78; }
     .line { position: absolute; left: 0; right: 0; border-top: 0.25mm dashed rgba(214, 72, 72, .55); }
     .tag { position: absolute; right: 2mm; font: 500 2.1mm Montserrat, sans-serif; color: rgba(214, 72, 72, .75);
-      transform: translateY(-110%); letter-spacing: .04em; }
+      transform: translateY(20%); letter-spacing: .04em; }
   `,
   template: `
     @if (store.showGuides()) {

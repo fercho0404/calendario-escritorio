@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { CalendarStore } from '../core/calendar.store';
 import { photoBackground } from '../core/image-utils';
 import { PhotoBox } from '../shared/photo-box';
@@ -32,8 +32,11 @@ const FRAME_W = 124;
         CALENDARIO {{ store.year() }}
       </div>
 
-      <div class="label" [class]="'label-' + texts().coverLabel.align" [style.font-size.mm]="labelSize()"
-        [style.top.mm]="frameTop() + frameH() - labelSize() * 0.55">
+      <div class="label" [class]="'label-' + texts().coverLabel.align" [class.dragging]="dragging()"
+        [style.font-size.mm]="labelSize()" [style.top.mm]="frameTop() + frameH() - labelSize() * 0.55"
+        [style.transform]="labelTransform()" title="Arrastra para mover la firma"
+        (pointerdown)="onLabelDown($event)" (pointermove)="onLabelMove($event)"
+        (pointerup)="onLabelUp()" (pointercancel)="onLabelUp()">
         {{ store.cover().label }}
       </div>
     </div>
@@ -56,10 +59,12 @@ const FRAME_W = 124;
     .tag-left { left: 43mm; }
     .tag-right { right: 43mm; }
     .label { position: absolute; font-family: var(--font-cover, Allura), cursive; line-height: 1.1;
-      color: var(--ink, #5a2a2e); white-space: nowrap; z-index: 2; }
+      color: var(--ink, #5a2a2e); white-space: nowrap; z-index: 2; cursor: move; touch-action: none;
+      border-radius: 1mm; }
+    .label:hover, .label.dragging { outline: 0.3mm dashed rgba(138, 79, 71, .6); outline-offset: 1mm; }
     .label-right { right: 14mm; }
     .label-left { left: 14mm; }
-    .label-center { left: 50%; transform: translateX(-50%); }
+    .label-center { left: 50%; }
   `,
 })
 export class CoverPage {
@@ -77,6 +82,43 @@ export class CoverPage {
     return bg ? photoBackground(bg, 210 / 150) : {};
   });
   protected readonly texts = computed(() => this.st().texts);
+
+  // ---- mover la firma ----
+  protected readonly labelTransform = computed(() => {
+    const c = this.store.cover();
+    const center = this.texts().coverLabel.align === 'center' ? 'translateX(-50%) ' : '';
+    return `${center}translate(${c.labelX ?? 0}mm, ${c.labelY ?? 0}mm)`;
+  });
+  protected readonly dragging = signal(false);
+  private drag: { x: number; y: number; lx: number; ly: number; k: number; id: number } | null = null;
+
+  protected onLabelDown(ev: PointerEvent) {
+    const el = ev.currentTarget as HTMLElement;
+    if (ev.button !== 0 || el.closest('.export-root')) return;
+    ev.preventDefault();
+    ev.stopPropagation();
+    const page = el.closest('.cal-page') as HTMLElement;
+    // px de pantalla por mm, teniendo en cuenta el zoom de la vista previa.
+    const k = page.getBoundingClientRect().width / 210;
+    const c = this.store.cover();
+    this.drag = { x: ev.clientX, y: ev.clientY, lx: c.labelX ?? 0, ly: c.labelY ?? 0, k, id: ev.pointerId };
+    el.setPointerCapture(ev.pointerId);
+    this.dragging.set(true);
+  }
+
+  protected onLabelMove(ev: PointerEvent) {
+    const d = this.drag;
+    if (!d || ev.pointerId !== d.id) return;
+    const snap = (v: number) => Math.round(v * 2) / 2;
+    const x = Math.max(-150, Math.min(150, snap(d.lx + (ev.clientX - d.x) / d.k)));
+    const y = Math.max(-120, Math.min(80, snap(d.ly + (ev.clientY - d.y) / d.k)));
+    this.store.updateCover({ labelX: x, labelY: y });
+  }
+
+  protected onLabelUp() {
+    this.drag = null;
+    this.dragging.set(false);
+  }
   protected readonly tagTop = computed(() => this.frameTop() - (4.4 * this.texts().coverTag.size + 3.2) * 0.55);
   protected readonly labelSize = computed(() => {
     const len = Math.max(1, this.store.cover().label.length);

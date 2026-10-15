@@ -46,6 +46,9 @@ export interface CoverConfig {
   label: string;
   tagColor: string;
   background?: Photo | null;
+  /** desplazamiento de la firma respecto a su posición por defecto, en mm */
+  labelX?: number;
+  labelY?: number;
 }
 
 export interface BackConfig {
@@ -263,7 +266,7 @@ export function defaultMonths(): MonthConfig[] {
 }
 
 export function defaultCover(): CoverConfig {
-  return { photo: null, label: 'Familia', tagColor: '#efbfa5' };
+  return { photo: null, label: 'Familia', tagColor: '#efbfa5', labelX: 0, labelY: 0 };
 }
 
 export function defaultBack(): BackConfig {

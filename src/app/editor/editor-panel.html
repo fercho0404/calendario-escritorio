@@ -314,6 +314,20 @@
             <label class="field inline">Color de la cinta del título
               <input type="color" [value]="store.cover().tagColor" (input)="store.updateCover({ tagColor: val($event) })" />
             </label>
+            <div class="field">Posición de la firma
+              <p class="help">Arrástrala en la vista previa o ajústala aquí para que no tape la foto.</p>
+            </div>
+            <label class="field inline">Horizontal: {{ store.cover().labelX ?? 0 }} mm
+              <input type="range" min="-150" max="150" step="0.5" [value]="store.cover().labelX ?? 0"
+                (input)="store.updateCover({ labelX: dec($event) })" />
+            </label>
+            <label class="field inline">Vertical: {{ store.cover().labelY ?? 0 }} mm
+              <input type="range" min="-120" max="80" step="0.5" [value]="store.cover().labelY ?? 0"
+                (input)="store.updateCover({ labelY: dec($event) })" />
+            </label>
+            @if (store.cover().labelX || store.cover().labelY) {
+              <button type="button" class="link" (click)="store.updateCover({ labelX: 0, labelY: 0 })">Volver a la posición original</button>
+            }
             <div class="field">Fondo de la portada (opcional, p. ej. de Canva)
               <app-photo-editor [photo]="store.cover().background" [maxSide]="2600" (photoChange)="store.updateCover({ background: $event })" />
             </div>
