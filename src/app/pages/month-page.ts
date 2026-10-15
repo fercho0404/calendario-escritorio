@@ -61,7 +61,7 @@ export class MonthPage {
 
   protected readonly weekdays = computed(() => weekdayNames(this.store.weekStart()));
   protected readonly name = computed(() => MONTH_NAMES[this.month() - 1]);
-  protected readonly st = computed(() => this.store.style());
+  protected readonly st = computed(() => this.store.styleFor(this.month()));
 
   /** Fondo de imagen: el del mes o, si no tiene, el general. */
   protected readonly bgPhoto = computed(() => this.cfg().background ?? this.st().background);

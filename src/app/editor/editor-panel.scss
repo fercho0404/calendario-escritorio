@@ -272,3 +272,5 @@ input[type='color'] { height: 30px; border: 1px solid var(--ui-line); border-rad
     &.on { background: #fff; color: var(--ui-ink); box-shadow: 0 1px 2px rgba(0, 0, 0, .08); }
   }
 }
+
+.scope-note { display: block; line-height: 1.45; .link { display: block; margin-top: 4px; } }

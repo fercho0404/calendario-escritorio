@@ -14,7 +14,7 @@ App web en Angular 22 para diseñar un calendario de escritorio familiar de **21
 - **Fotos** por cumpleaños y fallecimiento, en círculos en zigzag al lado del mes, con zoom y encuadre. Se pueden desactivar: sin fotos, la cuadrícula ocupa todo el ancho de la página.
 - **Portada** con foto, título `CALENDARIO {año}` y firma; **contraportada** con foto, año y texto.
 - Frase y **caption** al pie de cada mes, y colores editables por mes.
-- **Margen de argollado** configurable (por defecto 15 mm) con guía visual que no se exporta.
+- **Margen de argollado** configurable (por defecto 10 mm) con guía visual que no se exporta.
 - **Tamaño y alineación** de cada texto (nombre del mes, frase, días, números, nombres, festivos, pie, portada y contraportada).
 - Vista previa en vivo con **zoom** (botones, Ctrl + rueda o teclas + / - / 0) y arrastre para desplazarse; vista de todas las páginas y guardado automático en el navegador.
 - **Exportar a PDF** de 210 × 150 mm por página.
@@ -23,6 +23,8 @@ App web en Angular 22 para diseñar un calendario de escritorio familiar de **21
 ## Plantillas y fondos
 
 - **12 plantillas incluidas**: Acuarela, Minimalista, Floral, Boho terracota, Infantil, Elegante, Navidad, Romántico, Nórdico, Tropical, Vintage y Noche estrellada. Cambian colores, tipografías, decoraciones, forma de etiquetas y fotos, y el marco de portada. Las fechas, textos y fotos se conservan.
+- **Detalles por página**: decoración, colores, etiquetas, fotos, celdas y posición se pueden aplicar a todo el calendario o solo a una página.
+- **21 decoraciones**: acuarela, hojas, confeti, destellos, corazones, copos, lunares, arcoíris boho, marco, flores, mariposas, globos, banderines, nubes, sol, luna, ondas, notas musicales, geométrico, esquinas ornamentales y cinta washi.
 - **Plantillas propias**: guarda el estilo actual como `.json` (opcionalmente con fondos) y cárgalo después o compártelo.
 - **Fondos desde Canva**: diseña un lienzo de 21 × 15 cm (2480 × 1772 px), descárgalo como PNG o JPG y súbelo como fondo general de los meses, de un mes específico, de la portada o de la contraportada. Se puede ajustar la opacidad de las celdas, agregar bordes y mover la cuadrícula para que encaje con el diseño.
 

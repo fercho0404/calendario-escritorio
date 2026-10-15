@@ -13,6 +13,7 @@ import {
   Photo,
   PhotoShape,
   ProjectData,
+  StyleTokens,
   TEXT_ITEMS,
   TextAlign,
 } from '../core/models';
@@ -62,16 +63,28 @@ export class EditorPanel {
 
   // ---- estilo ----
   protected readonly decorOptions: SelectOption[] = [
-    { value: 'acuarela', label: 'Manchas de acuarela' },
-    { value: 'hojas', label: 'Ramitas de hojas' },
-    { value: 'confeti', label: 'Confeti' },
-    { value: 'estrellas', label: 'Destellos' },
-    { value: 'corazones', label: 'Corazones' },
-    { value: 'copos', label: 'Copos de nieve' },
-    { value: 'puntos', label: 'Lunares' },
-    { value: 'arcos', label: 'Arcoíris boho' },
-    { value: 'marco', label: 'Marco fino' },
-    { value: 'ninguna', label: 'Sin decoración' },
+    { value: 'acuarela', label: 'Manchas de acuarela', group: 'Clásicas' },
+    { value: 'hojas', label: 'Ramitas de hojas', group: 'Clásicas' },
+    { value: 'confeti', label: 'Confeti', group: 'Clásicas' },
+    { value: 'estrellas', label: 'Destellos', group: 'Clásicas' },
+    { value: 'corazones', label: 'Corazones', group: 'Clásicas' },
+    { value: 'copos', label: 'Copos de nieve', group: 'Clásicas' },
+    { value: 'puntos', label: 'Lunares', group: 'Clásicas' },
+    { value: 'arcos', label: 'Arcoíris boho', group: 'Clásicas' },
+    { value: 'marco', label: 'Marco fino', group: 'Clásicas' },
+    { value: 'flores', label: 'Flores', group: 'Nuevas' },
+    { value: 'mariposas', label: 'Mariposas', group: 'Nuevas' },
+    { value: 'globos', label: 'Globos', group: 'Nuevas' },
+    { value: 'banderines', label: 'Banderines', group: 'Nuevas' },
+    { value: 'nubes', label: 'Nubes', group: 'Nuevas' },
+    { value: 'sol', label: 'Sol', group: 'Nuevas' },
+    { value: 'luna', label: 'Luna y estrellas', group: 'Nuevas' },
+    { value: 'ondas', label: 'Ondas', group: 'Nuevas' },
+    { value: 'notas', label: 'Notas musicales', group: 'Nuevas' },
+    { value: 'geometrico', label: 'Geométrico', group: 'Nuevas' },
+    { value: 'esquinas', label: 'Esquinas ornamentales', group: 'Nuevas' },
+    { value: 'washi', label: 'Cinta washi', group: 'Nuevas' },
+    { value: 'ninguna', label: 'Sin decoración', group: 'Ninguna' },
   ];
   protected readonly labelOptions: { value: LabelStyle; label: string }[] = [
     { value: 'mancha', label: 'Mancha' },
@@ -124,9 +137,32 @@ export class EditorPanel {
   }
 
   protected setDecorColor(i: number, color: string) {
-    const cur = [...this.store.style().decorColors] as [string, string, string];
+    const cur = [...this.detailStyle().decorColors] as [string, string, string];
     cur[i] = color;
-    this.store.updateStyle({ decorColors: cur });
+    this.updateDetail({ decorColors: cur });
+  }
+
+  // ---- alcance de los detalles: todo el calendario o solo la página visible ----
+  protected readonly scope = signal<'all' | 'page'>('all');
+  protected readonly detailStyle = computed(() =>
+    this.scope() === 'page' ? this.store.styleFor(this.store.page()) : this.store.style(),
+  );
+  protected readonly pageHasOwn = computed(() => this.store.customizedPages().includes(this.store.page()));
+
+  private nameOfPage(p: number) {
+    return p === 0 ? 'la portada' : p === 13 ? 'la contraportada' : MONTH_NAMES[p - 1].toLowerCase();
+  }
+  protected readonly pageLabel = computed(() => this.nameOfPage(this.store.page()));
+  protected readonly customizedNames = computed(() =>
+    this.store
+      .customizedPages()
+      .map((p) => (p === 0 ? 'Portada' : p === 13 ? 'Contraportada' : MONTH_NAMES[p - 1]))
+      .join(', '),
+  );
+
+  protected updateDetail(patch: Partial<StyleTokens>) {
+    if (this.scope() === 'page') this.store.setPageStyle(this.store.page(), patch);
+    else this.store.updateStyle(patch);
   }
 
   protected saveTheme() {

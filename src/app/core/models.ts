@@ -62,6 +62,18 @@ export type DecorKind =
   | 'corazones'
   | 'copos'
   | 'puntos'
+  | 'flores'
+  | 'mariposas'
+  | 'notas'
+  | 'geometrico'
+  | 'nubes'
+  | 'globos'
+  | 'banderines'
+  | 'ondas'
+  | 'sol'
+  | 'luna'
+  | 'esquinas'
+  | 'washi'
   | 'arcos'
   | 'marco'
   | 'ninguna';
@@ -119,6 +131,27 @@ export function defaultTexts(): Record<TextKey, TextSetting> {
   };
 }
 
+/** Detalles de diseño que se pueden ajustar solo para una página. */
+export const DETAIL_KEYS = [
+  'ink',
+  'inkSoft',
+  'pageBg',
+  'decor',
+  'decorColors',
+  'titleWeight',
+  'titleSpacing',
+  'titleUpper',
+  'cellRadius',
+  'cellAlpha',
+  'cellBorder',
+  'labelStyle',
+  'photoShape',
+  'coverFrame',
+  'contentX',
+  'contentY',
+] as const;
+export type DetailKey = (typeof DETAIL_KEYS)[number];
+
 /** Tokens visuales del calendario (los define una plantilla y se pueden ajustar). */
 export interface StyleTokens {
   themeId: string;
@@ -164,6 +197,8 @@ export interface ProjectData {
   fontScript?: string;
   fontCover?: string;
   style?: StyleTokens;
+  /** ajustes de diseño propios por página (0 = portada, 1-12 = meses, 13 = contraportada) */
+  pageStyles?: Record<number, Partial<StyleTokens>>;
   events: CalEvent[];
   months: MonthConfig[];
   cover: CoverConfig;

@@ -98,6 +98,7 @@
     <!-- ===================== ESTILO ===================== -->
     @case ('estilo') {
       @let st = store.style();
+      @let ds = detailStyle();
       <section class="card">
         <h3>Plantillas</h3>
         <p class="help">Cambian colores, tipografías, decoraciones y formas. Tus fechas, textos y fotos se conservan.</p>
@@ -196,13 +197,31 @@
 
       <section class="card">
         <h3>Detalles del diseño</h3>
+        <div class="field">Aplicar cambios a
+          <div class="seg">
+            <button type="button" [class.on]="scope() === 'all'" (click)="scope.set('all')">Todo el calendario</button>
+            <button type="button" [class.on]="scope() === 'page'" (click)="scope.set('page')">Solo {{ pageLabel() }}</button>
+          </div>
+        </div>
+        @if (scope() === 'page') {
+          <div class="notice scope-note">
+            Lo que cambies aquí solo afecta a <strong>{{ pageLabel() }}</strong>. Navega a otra página para ajustarla por separado.
+            @if (pageHasOwn()) {
+              <button type="button" class="link danger" (click)="store.clearPageStyle(store.page())">Quitar ajustes de esta página</button>
+            }
+          </div>
+        }
+        @if (store.customizedPages().length) {
+          <p class="help">Páginas con ajustes propios: {{ customizedNames() }}.
+            <button type="button" class="link danger" (click)="store.clearPageStyle()">Quitar todos</button></p>
+        }
         <div class="field">Decoración
-          <app-search-select [options]="decorOptions" [value]="st.decor" (valueChange)="store.updateStyle({ decor: asDecor($event) })" />
+          <app-search-select [options]="decorOptions" [value]="ds.decor" (valueChange)="updateDetail({ decor: asDecor($event) })" />
         </div>
         <div class="field">Etiquetas de los nombres
           <div class="seg three">
             @for (o of labelOptions; track o.value) {
-              <button type="button" [class.on]="st.labelStyle === o.value" (click)="store.updateStyle({ labelStyle: o.value })">{{ o.label }}</button>
+              <button type="button" [class.on]="ds.labelStyle === o.value" (click)="updateDetail({ labelStyle: o.value })">{{ o.label }}</button>
             }
           </div>
         </div>
@@ -210,7 +229,7 @@
           <div class="field">Forma de las fotos
             <div class="seg three">
               @for (o of photoShapeOptions; track o.value) {
-                <button type="button" [class.on]="st.photoShape === o.value" (click)="store.updateStyle({ photoShape: o.value })">{{ o.label }}</button>
+                <button type="button" [class.on]="ds.photoShape === o.value" (click)="updateDetail({ photoShape: o.value })">{{ o.label }}</button>
               }
             </div>
           </div>
@@ -218,32 +237,32 @@
         <div class="field">Foto de portada y contraportada
           <div class="seg three">
             @for (o of frameOptions; track o.value) {
-              <button type="button" [class.on]="st.coverFrame === o.value" (click)="store.updateStyle({ coverFrame: o.value })">{{ o.label }}</button>
+              <button type="button" [class.on]="ds.coverFrame === o.value" (click)="updateDetail({ coverFrame: o.value })">{{ o.label }}</button>
             }
           </div>
         </div>
         <div class="field">Nombre del mes
           <div class="seg">
-            <button type="button" [class.on]="st.titleUpper" (click)="store.updateStyle({ titleUpper: true })">MAYÚSCULAS</button>
-            <button type="button" [class.on]="!st.titleUpper" (click)="store.updateStyle({ titleUpper: false })">Normal</button>
+            <button type="button" [class.on]="ds.titleUpper" (click)="updateDetail({ titleUpper: true })">MAYÚSCULAS</button>
+            <button type="button" [class.on]="!ds.titleUpper" (click)="updateDetail({ titleUpper: false })">Normal</button>
           </div>
         </div>
         <label class="field inline">Grosor del nombre del mes
-          <input type="range" min="300" max="700" step="100" [value]="st.titleWeight" (input)="store.updateStyle({ titleWeight: num($event) })" />
+          <input type="range" min="300" max="700" step="100" [value]="ds.titleWeight" (input)="updateDetail({ titleWeight: num($event) })" />
         </label>
         <label class="field inline">Espaciado del nombre del mes
-          <input type="range" min="0" max="0.4" step="0.01" [value]="st.titleSpacing" (input)="store.updateStyle({ titleSpacing: dec($event) })" />
+          <input type="range" min="0" max="0.4" step="0.01" [value]="ds.titleSpacing" (input)="updateDetail({ titleSpacing: dec($event) })" />
         </label>
-        <label class="field inline">Esquinas de las celdas: {{ st.cellRadius }} mm
-          <input type="range" min="0" max="5" step="0.2" [value]="st.cellRadius" (input)="store.updateStyle({ cellRadius: dec($event) })" />
+        <label class="field inline">Esquinas de las celdas: {{ ds.cellRadius }} mm
+          <input type="range" min="0" max="5" step="0.2" [value]="ds.cellRadius" (input)="updateDetail({ cellRadius: dec($event) })" />
         </label>
         <div class="colors">
-          <label>Texto <input type="color" [value]="st.ink" (input)="store.updateStyle({ ink: val($event) })" /></label>
-          <label>Texto suave <input type="color" [value]="st.inkSoft" (input)="store.updateStyle({ inkSoft: val($event) })" /></label>
-          <label>Fondo <input type="color" [value]="st.pageBg" (input)="store.updateStyle({ pageBg: val($event) })" /></label>
+          <label>Texto <input type="color" [value]="ds.ink" (input)="updateDetail({ ink: val($event) })" /></label>
+          <label>Texto suave <input type="color" [value]="ds.inkSoft" (input)="updateDetail({ inkSoft: val($event) })" /></label>
+          <label>Fondo <input type="color" [value]="ds.pageBg" (input)="updateDetail({ pageBg: val($event) })" /></label>
         </div>
         <div class="colors">
-          @for (c of st.decorColors; track $index) {
+          @for (c of ds.decorColors; track $index) {
             <label>Decoración {{ $index + 1 }} <input type="color" [value]="c" (input)="setDecorColor($index, val($event))" /></label>
           }
         </div>
@@ -259,21 +278,22 @@
         </div>
         <p class="help">Cada mes, la portada y la contraportada pueden tener su propio fondo desde la pestaña
           <button type="button" class="link" (click)="tab.set('pagina')">Página</button>.</p>
-        <label class="field inline">Opacidad de las celdas: {{ pct(st.cellAlpha) }}
-          <input type="range" min="0" max="1" step="0.05" [value]="st.cellAlpha" (input)="store.updateStyle({ cellAlpha: dec($event) })" />
+        <p class="help">Opacidad, borde y posición siguen la opción <em>Aplicar cambios a</em> de "Detalles del diseño"{{ scope() === 'page' ? ' (ahora: solo ' + pageLabel() + ')' : '' }}.</p>
+        <label class="field inline">Opacidad de las celdas: {{ pct(ds.cellAlpha) }}
+          <input type="range" min="0" max="1" step="0.05" [value]="ds.cellAlpha" (input)="updateDetail({ cellAlpha: dec($event) })" />
         </label>
         <label class="check">
-          <input type="checkbox" [checked]="st.cellBorder" (change)="store.updateStyle({ cellBorder: !st.cellBorder })" />
+          <input type="checkbox" [checked]="ds.cellBorder" (change)="updateDetail({ cellBorder: !ds.cellBorder })" />
           Borde en las celdas
         </label>
-        <label class="field inline">Mover calendario horizontal: {{ st.contentX }} mm
-          <input type="range" min="-10" max="10" step="0.5" [value]="st.contentX" (input)="store.updateStyle({ contentX: dec($event) })" />
+        <label class="field inline">Mover calendario horizontal: {{ ds.contentX }} mm
+          <input type="range" min="-10" max="10" step="0.5" [value]="ds.contentX" (input)="updateDetail({ contentX: dec($event) })" />
         </label>
-        <label class="field inline">Mover calendario vertical: {{ st.contentY }} mm
-          <input type="range" min="-10" max="10" step="0.5" [value]="st.contentY" (input)="store.updateStyle({ contentY: dec($event) })" />
+        <label class="field inline">Mover calendario vertical: {{ ds.contentY }} mm
+          <input type="range" min="-10" max="10" step="0.5" [value]="ds.contentY" (input)="updateDetail({ contentY: dec($event) })" />
         </label>
-        @if (st.contentX || st.contentY) {
-          <button type="button" class="link" (click)="store.updateStyle({ contentX: 0, contentY: 0 })">Volver a la posición original</button>
+        @if (ds.contentX || ds.contentY) {
+          <button type="button" class="link" (click)="updateDetail({ contentX: 0, contentY: 0 })">Volver a la posición original</button>
         }
       </section>
     }

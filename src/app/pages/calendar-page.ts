@@ -30,7 +30,7 @@ export class CalendarPage {
 
   /** Variables CSS con los tokens de estilo; todas las páginas las usan. */
   protected readonly vars = computed(() => {
-    const s = this.store.style();
+    const s = this.store.styleFor(this.index());
     const q = (f: string) => `"${f}"`;
     const texts: Record<string, string> = {};
     for (const [k, v] of Object.entries(s.texts)) {

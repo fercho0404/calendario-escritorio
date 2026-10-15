@@ -54,7 +54,7 @@ const PHOTO_W = 146;
 })
 export class BackPage {
   protected readonly store = inject(CalendarStore);
-  protected readonly st = computed(() => this.store.style());
+  protected readonly st = computed(() => this.store.styleFor(13));
   protected readonly photoW = PHOTO_W;
   protected readonly photoTop = computed(() => this.store.bindingMm() + 7);
   protected readonly photoH = computed(() => Math.min(96, 150 - this.photoTop() - 24));

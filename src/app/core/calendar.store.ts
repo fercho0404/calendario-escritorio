@@ -11,6 +11,7 @@ import {
   TextSetting,
   WeekStart,
   defaultTexts,
+  DETAIL_KEYS,
   defaultBack,
   defaultCover,
   defaultMonths,
@@ -30,7 +31,7 @@ function defaultYear(): number {
 @Injectable({ providedIn: 'root' })
 export class CalendarStore {
   readonly year = signal(defaultYear());
-  readonly bindingMm = signal(15);
+  readonly bindingMm = signal(10);
   readonly weekStart = signal<WeekStart>('lunes');
   /** Fotos de las personas al lado de cada mes. Sin fotos, la cuadrícula ocupa todo el ancho. */
   readonly showPhotos = signal(true);
@@ -42,6 +43,14 @@ export class CalendarStore {
   readonly cover = signal<CoverConfig>(defaultCover());
   readonly back = signal<BackConfig>(defaultBack());
   readonly style = signal<StyleTokens>(defaultStyle());
+  /** Ajustes de diseño que solo aplican a una página (sobrescriben el estilo general). */
+  readonly pageStyles = signal<Record<number, Partial<StyleTokens>>>({});
+  readonly customizedPages = computed(() =>
+    Object.entries(this.pageStyles())
+      .filter(([, v]) => v && Object.keys(v).length)
+      .map(([k]) => Number(k))
+      .sort((a, b) => a - b),
+  );
 
   /** Plantillas propias cargadas por el usuario (se guardan aparte del proyecto). */
   readonly customThemes = signal<ThemeDef[]>([]);
@@ -99,6 +108,7 @@ export class CalendarStore {
       fontScript: this.fontScript(),
       fontCover: this.fontCover(),
       style: this.style(),
+      pageStyles: this.pageStyles(),
       events: this.events(),
       months: this.months(),
       cover: this.cover(),
@@ -116,6 +126,7 @@ export class CalendarStore {
     if (p.fontCover) this.fontCover.set(p.fontCover);
     const def = defaultStyle();
     this.style.set({ ...def, ...(p.style ?? {}), texts: { ...def.texts, ...(p.style?.texts ?? {}) } });
+    this.pageStyles.set(p.pageStyles ?? {});
     if (Array.isArray(p.events)) this.events.set(p.events);
     if (Array.isArray(p.months) && p.months.length === 12) {
       const defs = defaultMonths();
@@ -127,7 +138,7 @@ export class CalendarStore {
 
   reset() {
     this.year.set(defaultYear());
-    this.bindingMm.set(15);
+    this.bindingMm.set(10);
     this.weekStart.set('lunes');
     this.showPhotos.set(true);
     this.fontMain.set('Montserrat');
@@ -138,6 +149,7 @@ export class CalendarStore {
     this.cover.set(defaultCover());
     this.back.set(defaultBack());
     this.style.set(defaultStyle());
+    this.pageStyles.set({});
     this.page.set(0);
   }
 
@@ -201,6 +213,30 @@ export class CalendarStore {
   // ---- estilo y plantillas ----
   updateStyle(patch: Partial<StyleTokens>) {
     this.style.update((s) => ({ ...s, ...patch }));
+  }
+
+  /** Estilo efectivo de una página: el general más sus ajustes propios. */
+  styleFor(page: number): StyleTokens {
+    const own = this.pageStyles()[page];
+    return own ? { ...this.style(), ...own } : this.style();
+  }
+
+  setPageStyle(page: number, patch: Partial<StyleTokens>) {
+    const clean: Partial<StyleTokens> = {};
+    for (const [k, v] of Object.entries(patch)) {
+      if ((DETAIL_KEYS as readonly string[]).includes(k)) (clean as Record<string, unknown>)[k] = v;
+    }
+    this.pageStyles.update((all) => ({ ...all, [page]: { ...(all[page] ?? {}), ...clean } }));
+  }
+
+  clearPageStyle(page?: number) {
+    if (page === undefined) this.pageStyles.set({});
+    else
+      this.pageStyles.update((all) => {
+        const { [page]: _drop, ...rest } = all;
+        void _drop;
+        return rest;
+      });
   }
 
   updateText(key: TextKey, patch: Partial<TextSetting>) {

@@ -16,13 +16,17 @@ const FRAME_W = 124;
       @if (store.cover().background; as bg) {
         <div class="bg-image" [style]="bgStyle()"></div>
       } @else {
-        <app-decor [kind]="st().decor" area="cover" [bind]="store.bindingMm()" [colors]="st().decorColors" />
+        <app-decor [kind]="st().decor === 'washi' ? 'ninguna' : st().decor" area="cover" [bind]="store.bindingMm()" [colors]="st().decorColors" />
       }
       <app-binding-guide />
 
       <div class="frame" [style.top.mm]="frameTop()" [style.width.mm]="frameW" [style.height.mm]="frameH()">
         <app-photo-box [photo]="store.cover().photo" [aspect]="photoAspect()" placeholder="Sube la foto de portada" />
       </div>
+      @if (st().decor === 'washi' && !store.cover().background) {
+        <!-- La cinta washi va encima de la foto -->
+        <app-decor class="over" kind="washi" area="cover" [bind]="store.bindingMm()" [colors]="st().decorColors" />
+      }
 
       <div class="tag" [class]="'tag-' + texts().coverTag.align" [style.top.mm]="tagTop()" [style.background]="store.cover().tagColor">
         CALENDARIO {{ store.year() }}
@@ -38,6 +42,7 @@ const FRAME_W = 124;
     :host { display: block; }
     .cal-page { position: relative; width: 210mm; height: 150mm; overflow: hidden; background: var(--page-bg, #fff); }
     .bg-image { position: absolute; inset: 0; }
+    .over { z-index: 1; }
     .frame { position: absolute; left: 50%; transform: translateX(-50%); box-sizing: border-box; }
     .frame app-photo-box { border-radius: inherit; overflow: hidden; }
     .frame-polaroid .frame { background: #fff; padding: 2.6mm; box-shadow: 0 0.5mm 1.8mm rgba(60, 40, 35, .22); }
@@ -59,7 +64,7 @@ const FRAME_W = 124;
 })
 export class CoverPage {
   protected readonly store = inject(CalendarStore);
-  protected readonly st = computed(() => this.store.style());
+  protected readonly st = computed(() => this.store.styleFor(0));
   protected readonly frameW = FRAME_W;
   protected readonly frameTop = computed(() => this.store.bindingMm() + 8.5);
   protected readonly frameH = computed(() => Math.min(86, 150 - this.frameTop() - 20));
