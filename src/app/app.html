@@ -28,32 +28,59 @@
   </aside>
 
   <section class="preview">
-    <div class="stage" #stage>
-      @if (view() === 'page') {
-        <div class="page-holder" [style.width.px]="pageW * scale()" [style.height.px]="pageH * scale()">
-          <div class="scaler" [style.transform]="'scale(' + scale() + ')'">
-            <app-calendar-page [index]="store.page()" />
+    <div class="stage-wrap">
+      <div
+        class="stage"
+        #stage
+        [class.can-pan]="view() === 'page' && zoom() > 1"
+        [class.panning]="panning()"
+        (wheel)="onWheel($event)"
+        (pointerdown)="onPanStart($event)"
+        (pointermove)="onPanMove($event)"
+        (pointerup)="onPanEnd()"
+        (pointercancel)="onPanEnd()"
+      >
+        @if (view() === 'page') {
+          <div class="page-holder" [style.width.px]="pageW * scale()" [style.height.px]="pageH * scale()">
+            <div class="scaler" [style.transform]="'scale(' + scale() + ')'">
+              <app-calendar-page [index]="store.page()" />
+            </div>
           </div>
-        </div>
+        } @else {
+          <div class="all">
+            @for (i of pages; track i) {
+              <button
+                type="button"
+                class="all-item"
+                [class.on]="store.page() === i"
+                (click)="select(i)"
+                [style.width.px]="pageW * gridScale()"
+                [style.height.px]="pageH * gridScale()"
+              >
+                <div class="scaler" [style.transform]="'scale(' + gridScale() + ')'">
+                  <app-calendar-page [index]="i" />
+                </div>
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      @if (view() === 'page') {
         <button type="button" class="nav prev" (click)="go(-1)" [disabled]="store.page() === 0" aria-label="Anterior">‹</button>
         <button type="button" class="nav next" (click)="go(1)" [disabled]="store.page() === 13" aria-label="Siguiente">›</button>
-        <div class="page-title">{{ pageTitle() }} · {{ store.page() + 1 }}/14</div>
-      } @else {
-        <div class="all">
-          @for (i of pages; track i) {
-            <button
-              type="button"
-              class="all-item"
-              [class.on]="store.page() === i"
-              (click)="select(i)"
-              [style.width.px]="pageW * gridScale()"
-              [style.height.px]="pageH * gridScale()"
-            >
-              <div class="scaler" [style.transform]="'scale(' + gridScale() + ')'">
-                <app-calendar-page [index]="i" />
-              </div>
-            </button>
-          }
+        @if (zoom() <= 1) {
+          <div class="page-title">{{ pageTitle() }} · {{ store.page() + 1 }}/14</div>
+        }
+        <div class="zoom-bar" role="group" aria-label="Zoom de la vista previa">
+          <button type="button" (click)="zoomBy(1 / 1.25)" [disabled]="zoom() <= 0.5" title="Alejar (-)" aria-label="Alejar">−</button>
+          <button type="button" class="pct" (click)="resetZoom()" title="Ajustar a la pantalla (0)">{{ zoomPct() }}</button>
+          <button type="button" (click)="zoomBy(1.25)" [disabled]="zoom() >= 6" title="Acercar (+)" aria-label="Acercar">+</button>
+          <span class="sep"></span>
+          <button type="button" class="fit" (click)="resetZoom()" [disabled]="zoom() === 1" title="Restablecer zoom (0)">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4" fill="none" stroke="currentColor" stroke-width="1.5" /></svg>
+            Ajustar
+          </button>
         </div>
       }
     </div>

@@ -15,7 +15,8 @@ App web en Angular 22 para diseñar un calendario de escritorio familiar de **21
 - **Portada** con foto, título `CALENDARIO {año}` y firma; **contraportada** con foto, año y texto.
 - Frase y **caption** al pie de cada mes, y colores editables por mes.
 - **Margen de argollado** configurable (por defecto 15 mm) con guía visual que no se exporta.
-- Vista previa en vivo, vista de todas las páginas y guardado automático en el navegador.
+- **Tamaño y alineación** de cada texto (nombre del mes, frase, días, números, nombres, festivos, pie, portada y contraportada).
+- Vista previa en vivo con **zoom** (botones, Ctrl + rueda o teclas + / - / 0) y arrastre para desplazarse; vista de todas las páginas y guardado automático en el navegador.
 - **Exportar a PDF** de 210 × 150 mm por página.
 - Descargar / abrir el proyecto completo (incluye fotos) como `.json`.
 

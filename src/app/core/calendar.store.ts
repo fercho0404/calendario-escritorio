@@ -7,7 +7,10 @@ import {
   MonthConfig,
   ProjectData,
   StyleTokens,
+  TextKey,
+  TextSetting,
   WeekStart,
+  defaultTexts,
   defaultBack,
   defaultCover,
   defaultMonths,
@@ -111,7 +114,8 @@ export class CalendarStore {
     if (p.fontMain) this.fontMain.set(p.fontMain);
     if (p.fontScript) this.fontScript.set(p.fontScript);
     if (p.fontCover) this.fontCover.set(p.fontCover);
-    this.style.set({ ...defaultStyle(), ...(p.style ?? {}) });
+    const def = defaultStyle();
+    this.style.set({ ...def, ...(p.style ?? {}), texts: { ...def.texts, ...(p.style?.texts ?? {}) } });
     if (Array.isArray(p.events)) this.events.set(p.events);
     if (Array.isArray(p.months) && p.months.length === 12) {
       const defs = defaultMonths();
@@ -199,6 +203,14 @@ export class CalendarStore {
     this.style.update((s) => ({ ...s, ...patch }));
   }
 
+  updateText(key: TextKey, patch: Partial<TextSetting>) {
+    this.style.update((s) => ({ ...s, texts: { ...s.texts, [key]: { ...s.texts[key], ...patch } } }));
+  }
+
+  resetTexts() {
+    this.style.update((s) => ({ ...s, texts: defaultTexts() }));
+  }
+
   /** Aplica colores, tipografías y formas. Conserva fechas, textos, fotos y ajustes de posición. */
   applyTheme(t: ThemeDef) {
     this.style.update((s) => ({
@@ -227,8 +239,9 @@ export class CalendarStore {
 
   /** Convierte el diseño actual en una plantilla para descargar y reutilizar. */
   currentAsTheme(name: string, withBackgrounds: boolean): ThemeDef {
-    const { themeId, background, contentX, contentY, ...style } = this.style();
+    const { themeId, background, contentX, contentY, texts, ...style } = this.style();
     void themeId;
+    void texts;
     void contentX;
     void contentY;
     const months = this.months();

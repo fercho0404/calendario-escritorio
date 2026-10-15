@@ -24,11 +24,12 @@ const FRAME_W = 124;
         <app-photo-box [photo]="store.cover().photo" [aspect]="photoAspect()" placeholder="Sube la foto de portada" />
       </div>
 
-      <div class="tag" [style.top.mm]="frameTop() - 4.2" [style.background]="store.cover().tagColor">
+      <div class="tag" [class]="'tag-' + texts().coverTag.align" [style.top.mm]="tagTop()" [style.background]="store.cover().tagColor">
         CALENDARIO {{ store.year() }}
       </div>
 
-      <div class="label" [style.font-size.mm]="labelSize()" [style.top.mm]="frameTop() + frameH() - labelSize() * 0.55">
+      <div class="label" [class]="'label-' + texts().coverLabel.align" [style.font-size.mm]="labelSize()"
+        [style.top.mm]="frameTop() + frameH() - labelSize() * 0.55">
         {{ store.cover().label }}
       </div>
     </div>
@@ -43,11 +44,17 @@ const FRAME_W = 124;
     .frame-simple .frame { border-radius: 2.5mm; overflow: hidden; box-shadow: 0 0.6mm 2mm rgba(60, 40, 35, .18); }
     .frame-arco .frame { border-radius: 62mm 62mm 2mm 2mm / 44mm 44mm 2mm 2mm; overflow: hidden;
       box-shadow: 0 0 0 1.4mm #fff, 0 0.6mm 2mm 1.4mm rgba(60, 40, 35, .16); }
-    .tag { position: absolute; left: 50%; transform: translateX(-50%); padding: 1.6mm 4.5mm; z-index: 2;
-      font: 600 4.4mm/1 var(--font-main, Montserrat), sans-serif; letter-spacing: .09em; color: #fff; white-space: nowrap;
+    .tag { position: absolute; padding: 1.6mm 4.5mm; z-index: 2;
+      font: 600 calc(4.4mm * var(--fs-coverTag, 1))/1 var(--font-main, Montserrat), sans-serif; letter-spacing: .09em; color: #fff; white-space: nowrap;
       box-shadow: 0 0.3mm 0.8mm rgba(0, 0, 0, .08); }
-    .label { position: absolute; right: 14mm; font-family: var(--font-cover, Allura), cursive; line-height: 1.1;
+    .tag-center { left: 50%; transform: translateX(-50%); }
+    .tag-left { left: 43mm; }
+    .tag-right { right: 43mm; }
+    .label { position: absolute; font-family: var(--font-cover, Allura), cursive; line-height: 1.1;
       color: var(--ink, #5a2a2e); white-space: nowrap; z-index: 2; }
+    .label-right { right: 14mm; }
+    .label-left { left: 14mm; }
+    .label-center { left: 50%; transform: translateX(-50%); }
   `,
 })
 export class CoverPage {
@@ -64,8 +71,10 @@ export class CoverPage {
     const bg = this.store.cover().background;
     return bg ? photoBackground(bg, 210 / 150) : {};
   });
+  protected readonly texts = computed(() => this.st().texts);
+  protected readonly tagTop = computed(() => this.frameTop() - (4.4 * this.texts().coverTag.size + 3.2) * 0.55);
   protected readonly labelSize = computed(() => {
     const len = Math.max(1, this.store.cover().label.length);
-    return Math.max(8, Math.min(19, 175 / (len * 0.42)));
+    return Math.max(8, Math.min(19, 175 / (len * 0.42))) * this.texts().coverLabel.size;
   });
 }

@@ -31,7 +31,6 @@ $col-gap: 3mm;
 }
 
 header {
-  height: 19.5mm;
   margin-bottom: 2mm;
   flex: none;
 }
@@ -39,8 +38,9 @@ header {
 h1 {
   margin: 0;
   font-weight: var(--title-weight, 400);
-  font-size: 12mm;
-  line-height: 13mm;
+  font-size: calc(12mm * var(--fs-title, 1));
+  line-height: calc(13mm * var(--fs-title, 1));
+  text-align: var(--al-title, left);
   letter-spacing: var(--title-spacing, 0.13em);
   text-transform: var(--title-transform, uppercase);
   color: var(--ink);
@@ -50,23 +50,26 @@ h1 {
 .subtitle {
   margin: 0.4mm 0 0 0.6mm;
   font-family: var(--font-script, 'Dancing Script'), cursive;
-  font-size: 4.6mm;
-  line-height: 5.5mm;
+  font-size: calc(4.6mm * var(--fs-subtitle, 1));
+  line-height: calc(5.5mm * var(--fs-subtitle, 1));
+  text-align: var(--al-subtitle, left);
   color: var(--ink-soft);
   white-space: nowrap;
 }
 
 .weekdays {
-  height: 5.5mm;
   flex: none;
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   column-gap: 0.7mm;
   align-items: center;
   span {
-    text-align: center;
-    font-size: 3.2mm;
+    text-align: var(--al-weekdays, center);
+    padding: 0 0.8mm;
+    font-size: calc(3.2mm * var(--fs-weekdays, 1));
     color: var(--ink-soft);
+    white-space: nowrap;
+    overflow: hidden;
   }
 }
 
@@ -105,11 +108,16 @@ h1 {
   position: absolute;
   top: 1.2mm;
   right: 1.6mm;
-  font-size: 4.5mm;
+  font-size: calc(4.5mm * var(--fs-numbers, 1));
   line-height: 1;
   font-weight: 400;
   color: var(--ink);
 }
+
+/* Alineación de los números: los íconos se pasan al lado contrario */
+.num-left .num { right: auto; left: 1.6mm; }
+.num-left .icons { left: auto; right: 0.8mm; }
+.num-center .num { left: 0; right: 0; text-align: center; }
 
 .icons {
   position: absolute;
@@ -142,7 +150,19 @@ h1 {
 .fest {
   color: var(--ink);
   padding-bottom: 0.4mm;
+  font-size: calc(1em * var(--fs-holidays, 1));
 }
+
+.blob { font-size: calc(1em * var(--fs-names, 1)); }
+
+/* Alineación de festivos y nombres */
+.hol-left .fest { align-self: flex-start; text-align: left; }
+.hol-center .fest { align-self: center; text-align: center; }
+.hol-right .fest { align-self: flex-end; text-align: right; }
+.names-left .blob { align-self: flex-start; text-align: left; }
+.names-center .blob { align-self: center; text-align: center; }
+.names-right .blob { align-self: flex-end; text-align: right; }
+.names-left .blob span, .names-right .blob span { text-align: inherit; }
 
 .blob {
   align-self: flex-end;
@@ -166,7 +186,6 @@ h1 {
 
 .lbl-texto .blob,
 .lbl-texto .blob.death {
-  align-self: center;
   min-width: 0;
   background: none;
   padding: 0 0 0.5mm;
@@ -216,10 +235,11 @@ h1 {
 
 .caption {
   flex: none;
-  height: 7mm;
   padding-top: 2.4mm;
   padding-left: 0.6mm;
-  font-size: 3.4mm;
+  padding-right: 0.6mm;
+  text-align: var(--al-caption, left);
+  font-size: calc(3.4mm * var(--fs-caption, 1));
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--ink-soft);

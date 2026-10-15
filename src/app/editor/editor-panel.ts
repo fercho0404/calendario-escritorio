@@ -13,6 +13,8 @@ import {
   Photo,
   PhotoShape,
   ProjectData,
+  TEXT_ITEMS,
+  TextAlign,
 } from '../core/models';
 import { THEME_FILE_APP, ThemeDef } from '../core/themes';
 import { FontDef, FontLoader, MAIN_FONTS, SCRIPT_FONTS } from '../core/fonts';
@@ -85,6 +87,15 @@ export class EditorPanel {
     { value: 'polaroid', label: 'Polaroid' },
     { value: 'arco', label: 'Arco' },
     { value: 'simple', label: 'Simple' },
+  ];
+  protected readonly textGroups = (['Meses', 'Portada', 'Contraportada'] as const).map((page) => ({
+    page,
+    items: TEXT_ITEMS.filter((t) => t.page === page),
+  }));
+  protected readonly aligns: { value: TextAlign; label: string; icon: string }[] = [
+    { value: 'left', label: 'Izquierda', icon: 'M2 3.5h12M2 8h8M2 12.5h10' },
+    { value: 'center', label: 'Centro', icon: 'M2 3.5h12M4 8h8M3 12.5h10' },
+    { value: 'right', label: 'Derecha', icon: 'M2 3.5h12M6 8h8M4 12.5h10' },
   ];
   protected readonly themeName = signal('');
   protected readonly themeWithBg = signal(true);

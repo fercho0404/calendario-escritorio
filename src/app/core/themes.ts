@@ -1,6 +1,6 @@
-import { Photo, StyleTokens } from './models';
+import { Photo, StyleTokens, defaultTexts } from './models';
 
-type ThemeStyle = Omit<StyleTokens, 'themeId' | 'background' | 'contentX' | 'contentY'>;
+type ThemeStyle = Omit<StyleTokens, 'themeId' | 'background' | 'contentX' | 'contentY' | 'texts'>;
 type Triple = [string, string, string];
 
 /** Plantilla de estilo: colores, tipografías, decoraciones y formas. No toca fechas, textos ni fotos. */
@@ -387,5 +387,5 @@ export const BUILT_IN_THEMES: ThemeDef[] = [
 
 export function defaultStyle(): StyleTokens {
   const t = BUILT_IN_THEMES[0];
-  return { ...t.style, themeId: t.id, background: null, contentX: 0, contentY: 0 };
+  return { ...t.style, themeId: t.id, background: null, contentX: 0, contentY: 0, texts: defaultTexts() };
 }

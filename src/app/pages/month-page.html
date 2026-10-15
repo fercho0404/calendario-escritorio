@@ -2,7 +2,7 @@
   class="cal-page"
   [class.no-photos]="!store.showPhotos()"
   [class.cell-border]="st().cellBorder"
-  [class]="'lbl-' + st().labelStyle + ' ph-' + st().photoShape"
+  [class]="'lbl-' + st().labelStyle + ' ph-' + st().photoShape + ' ' + alignClasses()"
   [style.--base]="cfg().base"
   [style.--accent]="cfg().accent"
   [style.--holiday]="cfg().holiday"
@@ -15,12 +15,12 @@
   <app-binding-guide />
 
   <div class="main" [style.transform]="shift()">
-    <header>
+    <header [style.height.mm]="layout().header">
       <h1>{{ name() }}</h1>
       <p class="subtitle">{{ cfg().subtitle }}</p>
     </header>
 
-    <div class="weekdays">
+    <div class="weekdays" [style.height.mm]="layout().weekdays">
       @for (w of weekdays(); track w) {
         <span>{{ w }}</span>
       }
@@ -72,7 +72,7 @@
       }
     </div>
 
-    <footer class="caption">{{ cfg().caption }}</footer>
+    <footer class="caption" [style.height.mm]="layout().caption">{{ cfg().caption }}</footer>
   </div>
 
   <div class="photos" [style.transform]="shift()">

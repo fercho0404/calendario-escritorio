@@ -86,14 +86,59 @@
   background: var(--ui-desk);
 }
 
-.stage {
+.stage-wrap {
   position: relative;
   flex: 1;
   min-height: 0;
   display: flex;
-  align-items: center;
-  justify-content: center;
+}
+
+/* margin: auto en el contenido (y no justify-content) para que al hacer zoom se pueda
+   desplazar hasta todos los bordes de la página. */
+.stage {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
   overflow: auto;
+  padding: 24px;
+  &.can-pan { cursor: grab; }
+  &.panning { cursor: grabbing; user-select: none; }
+  > .page-holder, > .all { margin: auto; }
+}
+
+.zoom-bar {
+  position: absolute;
+  right: 14px;
+  bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  background: rgba(255, 255, 255, .95);
+  border: 1px solid var(--ui-line);
+  border-radius: 9px;
+  box-shadow: 0 2px 8px rgba(60, 40, 30, .1);
+  button {
+    border: 0;
+    background: none;
+    min-width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    font: 600 15px Montserrat, sans-serif;
+    color: var(--ui-ink);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    &:hover:not(:disabled) { background: #f3eeeb; }
+    &:disabled { opacity: .35; cursor: default; }
+  }
+  .pct { font-size: 12px; min-width: 48px; font-variant-numeric: tabular-nums; }
+  .fit { font-size: 12px; padding: 0 8px; svg { width: 13px; height: 13px; } }
+  .sep { width: 1px; height: 18px; background: var(--ui-line); margin: 0 2px; }
 }
 
 .page-holder {

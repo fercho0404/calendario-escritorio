@@ -69,6 +69,56 @@ export type LabelStyle = 'mancha' | 'pastilla' | 'texto';
 export type PhotoShape = 'circulo' | 'aro' | 'redondeada';
 export type CoverFrame = 'polaroid' | 'arco' | 'simple';
 
+export type TextAlign = 'left' | 'center' | 'right';
+export type TextKey =
+  | 'title'
+  | 'subtitle'
+  | 'weekdays'
+  | 'numbers'
+  | 'names'
+  | 'holidays'
+  | 'caption'
+  | 'coverTag'
+  | 'coverLabel'
+  | 'backYear'
+  | 'backLabel';
+
+/** Tamaño (multiplicador, 1 = 100 %) y alineación de cada tipo de texto. */
+export interface TextSetting {
+  size: number;
+  align: TextAlign;
+}
+
+export const TEXT_ITEMS: { key: TextKey; label: string; page: 'Meses' | 'Portada' | 'Contraportada'; align: boolean }[] = [
+  { key: 'title', label: 'Nombre del mes', page: 'Meses', align: true },
+  { key: 'subtitle', label: 'Frase del mes', page: 'Meses', align: true },
+  { key: 'weekdays', label: 'Días de la semana', page: 'Meses', align: true },
+  { key: 'numbers', label: 'Números del día', page: 'Meses', align: true },
+  { key: 'names', label: 'Nombres (cumpleaños y fallecimientos)', page: 'Meses', align: true },
+  { key: 'holidays', label: 'Festivos', page: 'Meses', align: true },
+  { key: 'caption', label: 'Texto al pie', page: 'Meses', align: true },
+  { key: 'coverTag', label: 'Cinta "Calendario"', page: 'Portada', align: true },
+  { key: 'coverLabel', label: 'Firma', page: 'Portada', align: true },
+  { key: 'backYear', label: 'Año', page: 'Contraportada', align: false },
+  { key: 'backLabel', label: 'Texto', page: 'Contraportada', align: false },
+];
+
+export function defaultTexts(): Record<TextKey, TextSetting> {
+  return {
+    title: { size: 1, align: 'left' },
+    subtitle: { size: 1, align: 'left' },
+    weekdays: { size: 1, align: 'center' },
+    numbers: { size: 1, align: 'right' },
+    names: { size: 1, align: 'right' },
+    holidays: { size: 1, align: 'center' },
+    caption: { size: 1, align: 'left' },
+    coverTag: { size: 1, align: 'center' },
+    coverLabel: { size: 1, align: 'right' },
+    backYear: { size: 1, align: 'left' },
+    backLabel: { size: 1, align: 'right' },
+  };
+}
+
 /** Tokens visuales del calendario (los define una plantilla y se pueden ajustar). */
 export interface StyleTokens {
   themeId: string;
@@ -97,6 +147,8 @@ export interface StyleTokens {
   /** desplazamiento del contenido de los meses, en mm */
   contentX: number;
   contentY: number;
+  /** tamaño y alineación por tipo de texto (no lo cambian las plantillas) */
+  texts: Record<TextKey, TextSetting>;
 }
 
 export type WeekStart = 'lunes' | 'domingo';

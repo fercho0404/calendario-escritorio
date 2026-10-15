@@ -32,7 +32,13 @@ export class CalendarPage {
   protected readonly vars = computed(() => {
     const s = this.store.style();
     const q = (f: string) => `"${f}"`;
+    const texts: Record<string, string> = {};
+    for (const [k, v] of Object.entries(s.texts)) {
+      texts[`--fs-${k}`] = String(v.size);
+      texts[`--al-${k}`] = v.align;
+    }
     return {
+      ...texts,
       '--font-main': q(this.store.fontMain()),
       '--font-script': q(this.store.fontScript()),
       '--font-cover': q(this.store.fontCover()),

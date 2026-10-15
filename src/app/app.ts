@@ -38,7 +38,14 @@ export class App {
   protected readonly thumbScale = THUMB_SCALE;
 
   protected readonly view = signal<'page' | 'grid'>('page');
-  protected readonly scale = signal(1);
+  /** Escala que hace caber la página en el área de vista previa. */
+  private readonly fitScale = signal(1);
+  /** Zoom relativo al ajuste (1 = página completa visible). */
+  protected readonly zoom = signal(1);
+  protected readonly scale = computed(() => this.fitScale() * this.zoom());
+  protected readonly zoomPct = computed(() => `${Math.round(this.zoom() * 100)}%`);
+  protected readonly panning = signal(false);
+  private pan: { x: number; y: number; sl: number; st: number; id: number } | null = null;
   protected readonly gridScale = signal(0.4);
 
   protected readonly exporting = signal(false);
@@ -77,7 +84,7 @@ export class App {
     const pad = 48;
     const w = el.clientWidth - pad;
     const h = el.clientHeight - pad;
-    this.scale.set(Math.max(0.2, Math.min(w / PAGE_W_PX, h / PAGE_H_PX)));
+    this.fitScale.set(Math.max(0.2, Math.min(w / PAGE_W_PX, h / PAGE_H_PX)));
     const cols = w > 1100 ? 3 : w > 640 ? 2 : 1;
     this.gridScale.set(Math.max(0.15, (w - (cols - 1) * 20) / cols / PAGE_W_PX));
   }
@@ -101,9 +108,80 @@ export class App {
     this.store.setYear(parseInt((ev.target as HTMLInputElement).value, 10));
   }
 
+  // ---- zoom de la vista previa ----
+  private static readonly ZOOM_MIN = 0.5;
+  private static readonly ZOOM_MAX = 6;
+
+  protected zoomBy(factor: number) {
+    const el = this.stage()?.nativeElement;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    this.zoomAt(this.zoom() * factor, r.left + r.width / 2, r.top + r.height / 2);
+  }
+
+  protected resetZoom() {
+    this.zoom.set(1);
+  }
+
+  /** Ctrl + rueda (o pellizco en el touchpad) hace zoom hacia el puntero. */
+  protected onWheel(ev: WheelEvent) {
+    if (this.view() !== 'page' || !(ev.ctrlKey || ev.metaKey)) return;
+    ev.preventDefault();
+    this.zoomAt(this.zoom() * Math.exp(-ev.deltaY * 0.0018), ev.clientX, ev.clientY);
+  }
+
+  private zoomAt(target: number, cx: number, cy: number) {
+    const el = this.stage()?.nativeElement;
+    const holder = el?.querySelector<HTMLElement>('.page-holder');
+    const next = Math.min(App.ZOOM_MAX, Math.max(App.ZOOM_MIN, target));
+    if (!el || !holder) {
+      this.zoom.set(next);
+      return;
+    }
+    const r = el.getBoundingClientRect();
+    const old = this.scale();
+    // Punto de la página (en px sin escalar) que está bajo el puntero.
+    const ux = (el.scrollLeft + cx - r.left - holder.offsetLeft) / old;
+    const uy = (el.scrollTop + cy - r.top - holder.offsetTop) / old;
+    this.zoom.set(next);
+    requestAnimationFrame(() => {
+      const s = this.scale();
+      el.scrollLeft = holder.offsetLeft + ux * s - (cx - r.left);
+      el.scrollTop = holder.offsetTop + uy * s - (cy - r.top);
+    });
+  }
+
+  /** Arrastrar para desplazarse cuando la página es más grande que el área visible. */
+  protected onPanStart(ev: PointerEvent) {
+    const el = this.stage()?.nativeElement;
+    if (!el || ev.button !== 0) return;
+    if (el.scrollWidth <= el.clientWidth && el.scrollHeight <= el.clientHeight) return;
+    if ((ev.target as HTMLElement).closest('button')) return;
+    this.pan = { x: ev.clientX, y: ev.clientY, sl: el.scrollLeft, st: el.scrollTop, id: ev.pointerId };
+    el.setPointerCapture(ev.pointerId);
+    this.panning.set(true);
+  }
+
+  protected onPanMove(ev: PointerEvent) {
+    const el = this.stage()?.nativeElement;
+    if (!el || !this.pan || ev.pointerId !== this.pan.id) return;
+    el.scrollLeft = this.pan.sl - (ev.clientX - this.pan.x);
+    el.scrollTop = this.pan.st - (ev.clientY - this.pan.y);
+  }
+
+  protected onPanEnd() {
+    this.pan = null;
+    this.panning.set(false);
+  }
+
   protected onKey(ev: KeyboardEvent) {
     const t = ev.target as HTMLElement;
     if (t && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
+    if (this.view() === 'page' && !ev.ctrlKey && !ev.metaKey) {
+      if (ev.key === '+' || ev.key === '=') this.zoomBy(1.25);
+      if (ev.key === '-') this.zoomBy(1 / 1.25);
+      if (ev.key === '0') this.resetZoom();
+    }
     if (ev.key === 'ArrowRight') this.go(1);
     if (ev.key === 'ArrowLeft') this.go(-1);
   }

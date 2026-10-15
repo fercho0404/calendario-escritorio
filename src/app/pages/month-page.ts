@@ -14,7 +14,8 @@ const PAD_RIGHT = 4;
 const PHOTO_COL = 48;
 const COL_GAP = 3;
 const GRID_GAP = 0.7;
-const HEADER_AND_FOOTER = 39;
+/** Alto fijo del encabezado y pie (sin escalar), en mm: margen sup. 1 + margen bajo título 2 + inferior 4 */
+const FIXED_V = 7;
 const MAIN_W = 210 - PAD_LEFT - PAD_RIGHT - PHOTO_COL - COL_GAP;
 const CELL_W = (MAIN_W - 6 * GRID_GAP) / 7;
 /** Sin columna de fotos la cuadrícula usa todo el ancho, con márgenes simétricos. */
@@ -78,10 +79,24 @@ export class MonthPage {
 
   protected readonly rows = computed(() => this.cells().length / 7);
 
+  /** Alturas de encabezado, días y pie según el tamaño de letra elegido. */
+  protected readonly layout = computed(() => {
+    const t = this.st().texts;
+    const header = 13 * t.title.size + 6.5 * t.subtitle.size;
+    const weekdays = 5.5 * Math.max(0.6, t.weekdays.size);
+    const caption = 2.4 + 4.6 * t.caption.size;
+    return { header, weekdays, caption, reserved: FIXED_V + header + weekdays + caption };
+  });
+
+  protected readonly alignClasses = computed(() => {
+    const t = this.st().texts;
+    return `num-${t.numbers.align} names-${t.names.align} hol-${t.holidays.align}`;
+  });
+
   protected readonly cells = computed<CellView[]>(() => {
     const grid = buildMonthGrid(this.store.year(), this.month(), this.store.events(), this.store.weekStart());
     const rows = grid.length / 7;
-    const gridH = 150 - this.store.bindingMm() - HEADER_AND_FOOTER;
+    const gridH = 150 - this.store.bindingMm() - this.layout().reserved;
     const cellH = (gridH - (rows - 1) * GRID_GAP) / rows;
     const cellW = this.store.showPhotos() ? CELL_W : CELL_W_FULL;
     return grid.map((c) => {
@@ -99,6 +114,7 @@ export class MonthPage {
         fontMm = Math.max(1.8, Math.min(3.9, byWidth, byHeight));
         if (!blobs) fontMm = Math.min(fontMm, 3.2);
       }
+      // El tamaño elegido por el usuario se aplica en CSS sobre este valor (--fs-names / --fs-holidays).
       return { ...c, fontMm, festLines, birthLines, deathLines };
     });
   });

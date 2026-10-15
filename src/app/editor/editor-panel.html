@@ -165,6 +165,36 @@
 
 
       <section class="card">
+        <div class="card-head">
+          <h3>Textos: tamaño y alineación</h3>
+          <button type="button" class="link" (click)="store.resetTexts()">Restablecer</button>
+        </div>
+        @for (g of textGroups; track g.page) {
+          <div class="text-group">{{ g.page }}</div>
+          @for (item of g.items; track item.key) {
+            @let t = st.texts[item.key];
+            <div class="text-row">
+              <span class="text-name">{{ item.label }}</span>
+              <span class="text-pct">{{ pct(t.size) }}</span>
+              <input type="range" min="0.5" max="2" step="0.05" [value]="t.size" [attr.aria-label]="'Tamaño de ' + item.label"
+                (input)="store.updateText(item.key, { size: dec($event) })" (dblclick)="store.updateText(item.key, { size: 1 })" />
+              @if (item.align) {
+                <div class="align-seg" role="group" [attr.aria-label]="'Alineación de ' + item.label">
+                  @for (a of aligns; track a.value) {
+                    <button type="button" [class.on]="t.align === a.value" [title]="a.label" [attr.aria-label]="a.label"
+                      (click)="store.updateText(item.key, { align: a.value })">
+                      <svg viewBox="0 0 16 16" aria-hidden="true"><path [attr.d]="a.icon" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none" /></svg>
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+          }
+        }
+        <p class="help">Doble clic en una barra la devuelve al 100 %. Los nombres en las celdas se ajustan solos al espacio; este control los agranda o achica a partir de ese ajuste.</p>
+      </section>
+
+      <section class="card">
         <h3>Detalles del diseño</h3>
         <div class="field">Decoración
           <app-search-select [options]="decorOptions" [value]="st.decor" (valueChange)="store.updateStyle({ decor: asDecor($event) })" />

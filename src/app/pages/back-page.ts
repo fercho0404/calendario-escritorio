@@ -46,9 +46,9 @@ const PHOTO_W = 146;
     .frame-polaroid .photo { box-shadow: 0 0 0 2.4mm #fff, 0 0.6mm 2mm 2.4mm rgba(60, 40, 35, .16); }
     .frame-arco .photo { border-radius: 62mm 62mm 2mm 2mm / 44mm 44mm 2mm 2mm; }
     .foot { position: absolute; left: 14mm; right: 14mm; bottom: 7mm; display: flex; align-items: center; gap: 5mm; }
-    .year { font-size: 10mm; font-weight: 300; letter-spacing: .06em; line-height: 1; }
+    .year { font-size: calc(10mm * var(--fs-backYear, 1)); font-weight: 300; letter-spacing: .06em; line-height: 1; }
     .rule { flex: 1; height: 0.35mm; background: var(--deco-1, #b9908a); opacity: .8; }
-    .label { font-size: 4.2mm; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
+    .label { font-size: calc(4.2mm * var(--fs-backLabel, 1)); letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
     .vrule { position: absolute; left: 14mm; width: 0.35mm; height: 50mm; background: var(--deco-1, #b9908a); opacity: .8; }
   `,
 })
